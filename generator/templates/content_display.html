@@ -1,0 +1,148 @@
+{% extends "layout.html" %}
+{% block title %}{{ content.title }}{% endblock %}
+{% block social_image %}
+  {% if social_image_url %}
+  <meta name="twitter:image" content="{{ social_image_url }}">
+  <meta property="og:image" content="{{ social_image_url }}">
+  {% else %}
+  {{ super() }}
+  {% endif %}
+{% endblock %}
+
+{% block twitter_card %}
+  {% if social_image_url %}
+  <meta name="twitter:card" content="summary_large_image">
+  {% else %}
+  {{ super() }}
+  {% endif %}
+{% endblock %}
+
+{% block htmlhead %}
+  {{ super() }}
+  <meta name="description" content="{{ ctx.render_summary()|striptags }}">
+  <meta name="twitter:description" content="{{ ctx.render_summary()|striptags }}">
+  <meta property="og:description" content="{{ ctx.render_summary()|striptags }}">
+  <meta property="og:type" content="article">
+  {% if ctx.pub_date %}
+  <meta property="article:published_time" content="{{ ctx.pub_date.isoformat() }}">
+  <meta property="article:author" content="Armin Ronacher">
+  {% if ctx.tags %}
+  {% for tag in ctx.tags %}
+  <meta property="article:tag" content="{{ tag }}">
+  {% endfor %}
+  {% endif %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": "{{ content.title|e }}",
+    "description": "{{ ctx.render_summary()|striptags|e }}",
+    "author": {
+      "@type": "Person",
+      "name": "Armin Ronacher",
+      "url": "https://lucumr.pocoo.org/about/"
+    },
+    "datePublished": "{{ ctx.pub_date.isoformat() }}",
+    "url": "https://lucumr.pocoo.org{{ slug }}",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "https://lucumr.pocoo.org{{ slug }}"
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": "Armin Ronacher",
+      "url": "https://lucumr.pocoo.org/about/"
+    }{% if social_image_url %},
+    "image": {
+      "@type": "ImageObject",
+      "url": "{{ social_image_url }}",
+      "width": 1200,
+      "height": 630
+    }{% endif %}{% if ctx.tags %},
+    "keywords": {{ ctx.tags|tojson }}{% endif %}
+  }
+  </script>
+  {% endif %}
+{% endblock %}
+{% block body %}
+  {{ content.html_title }}
+  {% if ctx.pub_date %}
+  <p class=date data-date="{{ ctx.pub_date.isoformat() }}">written on {{ format_date(ctx.pub_date, format='full') }}</p>
+  {% endif %}
+
+  {{ content.fragment }}
+
+  {% if ctx.tags %}
+  <p class=tags>This entry was tagged
+    {% for tag in ctx.tags|sort(case_sensitive=true) %}
+      {%- if not loop.first and not loop.last %}, {% endif -%}
+      {%- if loop.last and not loop.first %} and {% endif %}
+      <a href="{{ link_to('tag', tag=tag) }}">{{ tag }}</a>
+    {%- endfor %}
+  {% endif %}
+
+  <p class="markdown-links">
+    <a href="{{ slug.rstrip('/') }}.md" id="copy-markdown">copy as</a> / <a href="{{ slug.rstrip('/') }}.md" id="view-markdown">view</a> markdown
+  </p>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const copyLink = document.getElementById('copy-markdown');
+      const markdownUrl = '{{ slug.rstrip('/') }}.md';
+      
+      function showFlashNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'flash-notification';
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Fade in
+        requestAnimationFrame(() => {
+          notification.style.opacity = '1';
+        });
+        
+        // Remove after 1 second
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 200);
+        }, 1500);
+      }
+      
+      async function copyMarkdown() {
+        try {
+          const response = await fetch(markdownUrl);
+          const markdown = await response.text();
+          await navigator.clipboard.writeText(markdown);
+          
+          showFlashNotification('page copied as markdown to clipboard');
+        } catch (err) {
+          console.error('Failed to copy markdown:', err);
+          alert('Failed to copy markdown to clipboard');
+        }
+      }
+      
+      // Handle copy link click
+      if (copyLink) {
+        copyLink.addEventListener('click', function(e) {
+          e.preventDefault();
+          copyMarkdown();
+        });
+      }
+      
+      // Handle Ctrl+C / Cmd+C when nothing is selected
+      document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+          const selection = window.getSelection();
+          if (selection.toString().length === 0) {
+            e.preventDefault();
+            copyMarkdown();
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}

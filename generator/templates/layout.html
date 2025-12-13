@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset=utf-8>
+  {% block htmlhead %}
+    <title>{% block title %}Home{% endblock %} | Dark Thoughts</title>
+    <link href="/feed.atom" rel="alternate" title="dark" type="application/atom+xml">
+    <link href="/feed.xml" rel="alternate" title="dark" type="application/rss+xml">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    {%- for link in links %}
+    <link rel="{{ link.rel }}" href="{{ link.href }}"{%
+      if link.media %} media="{{ link.media }}"{% endif %} type="{{ link.type }}">
+    {%- endfor %}
+    <link rel="stylesheet" href="/static/fonts.css" type="text/css">
+    <link rel="stylesheet" href="/static/style-2025.css" type="text/css">
+    <link rel="stylesheet" href="/static/_pygments.css" type="text/css">
+    <meta name="title" content="{{ self.title() }}">
+    <meta property="og:title" content="{{ self.title() }}">
+    <meta property="og:site_name" content="dark">
+    {% block twitter_card %}
+    <meta name="twitter:card" content="summary">
+    {% endblock %}
+  {% endblock %}
+  </head>
+  <body>
+    <div class="header-image">
+      <canvas id="header-canvas"></canvas>
+    </div>
+    <script src="/static/dither.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const dateEl = document.querySelector("p.date");
+        if (dateEl) {
+          const pubDate = new Date(dateEl.dataset.date);
+          const now = new Date();
+          const dayDiff = Math.floor((now.getTime() - pubDate.getTime()) / (1000 * 60 * 60 * 24));
+          const yearDiff = Math.floor(dayDiff / 365);
+
+          if (dayDiff >= 365) {
+            const warning = document.createElement("span");
+            warning.className = "date-warning";
+            warning.textContent = `this article is ${yearDiff} year${yearDiff != 1 ? 's' : ''} old.`;
+            dateEl.appendChild(document.createTextNode(" — "));
+            dateEl.appendChild(warning);
+          }
+        }
+      });
+    </script>
+    <div class=container>
+      <div class=header>
+        <a href="/">Dark Thoughts</a>
+      </div>
+      <div class=navigation>
+        <ul>
+          <li><a href="/">posts</a>
+          <li><a href="/archive/">archive</a>
+          <li><a href="/about/">about</a>
+        </ul>
+      </div>
+      <div class=body>
+        {% block body %}{% endblock %}
+      </div>
+      <div class=footer>
+        <p>&copy; Copyright {{ format_date(format='YYYY') }} by <a href="https://mitsuhiko.at/">Armin Ronacher</a>.
+        <p>
+          Subscribe via <a href="/feed.atom" rel="alternate" title="Dark Thoughts">atom</a> / <a href="/feed.xml" rel="alternate" title="dark">RSS</a>.
+      </div>
+    </div>
+  </body>
+</html>

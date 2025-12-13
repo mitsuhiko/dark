@@ -1,0 +1,161 @@
+/* crimson-text-regular - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/crimson-text-v19-latin-regular.woff2') format('woff2');
+}
+
+/* crimson-text-italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: italic;
+  font-weight: 400;
+  src: url('fonts/crimson-text-v19-latin-italic.woff2') format('woff2');
+}
+
+/* crimson-text-600 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: normal;
+  font-weight: 600;
+  src: url('fonts/crimson-text-v19-latin-600.woff2') format('woff2');
+}
+
+/* crimson-text-600italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: italic;
+  font-weight: 600;
+  src: url('fonts/crimson-text-v19-latin-600italic.woff2') format('woff2');
+}
+
+/* crimson-text-700 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/crimson-text-v19-latin-700.woff2') format('woff2');
+}
+
+/* crimson-text-700italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Crimson Text';
+  font-style: italic;
+  font-weight: 700;
+  src: url('fonts/crimson-text-v19-latin-700italic.woff2') format('woff2');
+}
+
+/* playfair-display-regular - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/playfair-display-v40-latin-regular.woff2') format('woff2');
+}
+
+/* playfair-display-italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 400;
+  src: url('fonts/playfair-display-v40-latin-italic.woff2') format('woff2');
+}
+
+/* playfair-display-500 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 500;
+  src: url('fonts/playfair-display-v40-latin-500.woff2') format('woff2');
+}
+
+/* playfair-display-500italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 500;
+  src: url('fonts/playfair-display-v40-latin-500italic.woff2') format('woff2');
+}
+
+/* playfair-display-600 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  src: url('fonts/playfair-display-v40-latin-600.woff2') format('woff2');
+}
+
+/* playfair-display-600italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 600;
+  src: url('fonts/playfair-display-v40-latin-600italic.woff2') format('woff2');
+}
+
+/* playfair-display-700 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/playfair-display-v40-latin-700.woff2') format('woff2');
+}
+
+/* playfair-display-700italic - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Playfair Display';
+  font-style: italic;
+  font-weight: 700;
+  src: url('fonts/playfair-display-v40-latin-700italic.woff2') format('woff2');
+}
+
+/* ubuntu-mono-regular - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Ubuntu Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/ubuntu-mono-v15-latin-regular.woff2') format('woff2');
+}
+
+/* ubuntu-mono-italic - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Ubuntu Mono';
+  font-style: italic;
+  font-weight: 400;
+  src: url('fonts/ubuntu-mono-v15-latin-italic.woff2') format('woff2');
+}
+
+/* ubuntu-mono-700 - latin */
+@font-face {
+  font-display: block;
+  font-family: 'Ubuntu Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: url('fonts/ubuntu-mono-v15-latin-700.woff2') format('woff2');
+}
+
+/* ubuntu-mono-700italic - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Ubuntu Mono';
+  font-style: italic;
+  font-weight: 700;
+  src: url('fonts/ubuntu-mono-v15-latin-700italic.woff2') format('woff2');
+}

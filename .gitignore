@@ -1,0 +1,5 @@
+_build
+_trash
+.venv
+.generator_cache
+__pycache__

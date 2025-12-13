@@ -1,0 +1,73 @@
+{% extends "layout.html" %}
+{% block title %}Entries tagged "{{ tag.name }}"{% endblock %}
+{% block body %}
+  <h1>Entries <a href="{{ link_to('tagcloud') }}">tagged</a> "{{ tag.name }}"</h1>
+  <div class="tag-sort-controls">
+    <p>Sort entries by:
+      <label><input type="radio" name="sort" value="title" checked> <span>title</span></label>,
+      <label><input type="radio" name="sort" value="date"> <span>publication date</span></label>
+  </div>
+  <ul id="tag-entries">
+  {%- for entry in entries %}
+    <li data-idx="{{ loop.index0 }}" data-date="{{ entry.pub_date.isoformat() if entry.pub_date else '' }}">
+      <a href="{{ link_to('page', slug=entry.slug) }}">{{ entry.title }}</a>
+      {%- if entry.pub_date %}, written on {{ format_date(entry.pub_date, format='long') }}{% endif %}
+    </li>
+  {%- endfor %}
+  </ul>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const sortControls = document.querySelectorAll('input[name="sort"]');
+      const entriesList = document.getElementById('tag-entries');
+      const storageKey = 'tag-sort-preference';
+      
+      function sortEntries(sortBy) {
+        const entries = Array.from(entriesList.children);
+        
+        entries.sort(function(a, b) {
+          if (sortBy === 'title') {
+            const idxA = parseInt(a.dataset.idx);
+            const idxB = parseInt(b.dataset.idx);
+            return idxA - idxB;
+          } else if (sortBy === 'date') {
+            const dateA = a.dataset.date || '';
+            const dateB = b.dataset.date || '';
+            // Sort dates descending (newest first)
+            return dateB.localeCompare(dateA);
+          }
+          return 0;
+        });
+        
+        // Reorder the DOM elements
+        entries.forEach(function(entry) {
+          entriesList.appendChild(entry);
+        });
+      }
+      
+      // Load saved preference from localStorage
+      const savedSort = localStorage.getItem(storageKey);
+      if (savedSort) {
+        const savedControl = document.querySelector(`input[name="sort"][value="${savedSort}"]`);
+        if (savedControl) {
+          // Clear default checked state
+          sortControls.forEach(function(control) {
+            control.checked = false;
+          });
+          // Set saved preference
+          savedControl.checked = true;
+          sortEntries(savedSort);
+        }
+      }
+      
+      sortControls.forEach(function(control) {
+        control.addEventListener('change', function() {
+          if (this.checked) {
+            // Save preference to localStorage
+            localStorage.setItem(storageKey, this.value);
+            sortEntries(this.value);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}
