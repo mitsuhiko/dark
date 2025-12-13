@@ -231,12 +231,22 @@
     uniform sampler2D u_bayer;
     uniform vec2 u_resolution;
     uniform int u_ditherMode;
+    uniform float u_time;
     varying vec2 v_texCoord;
 
     float hash(vec2 p) {
       vec3 p3 = fract(vec3(p.xyx) * 0.1031);
       p3 += dot(p3, p3.yzx + 33.33);
       return fract((p3.x + p3.y) * p3.z);
+    }
+
+    // Animated noise for the "alive" effect
+    float animatedNoise(vec2 p, float t) {
+      // Slow-moving noise pattern - transitions once per second
+      float n1 = hash(p + floor(t));
+      float n2 = hash(p + floor(t) + 1.0);
+      float blend = fract(t);
+      return mix(n1, n2, smoothstep(0.0, 1.0, blend));
     }
 
     float atkinsonThreshold(vec2 pos) {
@@ -282,9 +292,24 @@
         threshold = texture2D(u_bayer, bayerCoord).r;
       }
 
-      float dithered = step(threshold + 0.1, gray);
+      // Animated noise - affects the dither threshold to make bright pixels flicker
+      vec2 noiseCoord = gl_FragCoord.xy * 0.15;
+      float noise = animatedNoise(noiseCoord, u_time) - 0.5;
+
+      // Subtle flicker - varies the threshold over time for organic movement
+      float flicker = 0.08 * sin(u_time * 2.0 + hash(gl_FragCoord.xy * 0.2) * 6.28);
+
+      // Effect intensity ramps up with brightness - no effect on dark areas
+      // Starts at gray ~0.05, full effect at gray ~0.3+
+      float effectIntensity = smoothstep(0.05, 0.3, gray);
+
+      // Apply noise and flicker to the dither threshold, scaled by brightness
+      float animatedThreshold = threshold + 0.1 + (noise * 0.15 + flicker) * effectIntensity;
+      float dithered = step(animatedThreshold, gray);
+
       vec3 dark = vec3(0.067);
       vec3 cream = vec3(0.91, 0.835, 0.718);
+
       gl_FragColor = vec4(mix(dark, cream, dithered), 1.0);
     }
   `;
@@ -385,18 +410,31 @@
     gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
 
     const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
+    const timeLoc = gl.getUniformLocation(program, 'u_time');
+
+    let startTime = performance.now();
+    let needsResize = true;
 
     function render() {
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform2f(resolutionLoc, canvas.width, canvas.height);
+      if (needsResize) {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * window.devicePixelRatio;
+        canvas.height = rect.height * window.devicePixelRatio;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(resolutionLoc, canvas.width, canvas.height);
+        needsResize = false;
+      }
+
+      // Update time uniform for animation (2000 = half speed)
+      const elapsed = (performance.now() - startTime) / 2000.0;
+      gl.uniform1f(timeLoc, elapsed);
 
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      requestAnimationFrame(render);
     }
 
     img.parentNode.replaceChild(canvas, img);
@@ -407,7 +445,9 @@
       img.onload = render;
     }
 
-    window.addEventListener('resize', render);
+    window.addEventListener('resize', function() {
+      needsResize = true;
+    });
   }
 
   // Initialize all dithered images when DOM is ready
