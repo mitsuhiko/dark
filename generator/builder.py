@@ -401,9 +401,6 @@ class Builder:
 
         Path(post.output_path).write_text(html, encoding="utf-8")
 
-        # Generate markdown file alongside HTML for all posts and pages
-        self.build_markdown_file(post)
-
         # Build redirect page if this is a blog post with leading zeros needed
         slug_with_leading_zeros = pad_date_slug(post.slug)
         if slug_with_leading_zeros != post.slug:
@@ -412,13 +409,6 @@ class Builder:
         # Notify that this individual page was rebuilt (triggers immediate reload)
         if self.on_page_rebuilt:
             self.on_page_rebuilt()
-
-    def build_markdown_file(self, post):
-        """Build markdown file alongside HTML."""
-        html_path = Path(post.output_path)
-        md_path = html_path.parent.parent / f"{html_path.parent.name}.md"
-        md_path.parent.mkdir(parents=True, exist_ok=True)
-        md_path.write_text(post.content, encoding="utf-8")
 
     def build_redirect_page(self, post, redirect_slug):
         """Build a redirect page for the leading zero URL."""

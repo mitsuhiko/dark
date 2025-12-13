@@ -335,119 +335,125 @@
   }
 
   function initDitheredImage(img) {
-    const canvas = document.createElement('canvas');
-    canvas.className = img.className.replace('dithered-image', '').trim();
-    canvas.style.cssText = img.style.cssText;
+    // Wait for image to load before setting up canvas
+    function setup() {
+      const canvas = document.createElement('canvas');
+      canvas.className = img.className.replace('dithered-image', '').trim();
+      canvas.style.cssText = img.style.cssText;
 
-    // Copy image dimensions to canvas
-    const imgRect = img.getBoundingClientRect();
-    canvas.style.width = imgRect.width + 'px';
-    canvas.style.height = imgRect.height + 'px';
+      // Image is loaded, dimensions are now valid
+      const imgRect = img.getBoundingClientRect();
+      canvas.style.width = imgRect.width + 'px';
+      canvas.style.height = imgRect.height + 'px';
 
-    const gl = canvas.getContext('webgl');
-    if (!gl) return;
+      const gl = canvas.getContext('webgl');
+      if (!gl) return;
 
-    const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
-    const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSourceImage);
-    const program = gl.createProgram();
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    gl.useProgram(program);
+      const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
+      const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSourceImage);
+      const program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      gl.useProgram(program);
 
-    // Position buffer
-    const posBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
-    const posLoc = gl.getAttribLocation(program, 'a_position');
-    gl.enableVertexAttribArray(posLoc);
-    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+      // Position buffer
+      const posBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+      const posLoc = gl.getAttribLocation(program, 'a_position');
+      gl.enableVertexAttribArray(posLoc);
+      gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 
-    // Texture coord buffer
-    const texBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
-    const texLoc = gl.getAttribLocation(program, 'a_texCoord');
-    gl.enableVertexAttribArray(texLoc);
-    gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
+      // Texture coord buffer
+      const texBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, texBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0,0, 1,0, 0,1, 1,1]), gl.STATIC_DRAW);
+      const texLoc = gl.getAttribLocation(program, 'a_texCoord');
+      gl.enableVertexAttribArray(texLoc);
+      gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 0, 0);
 
-    // Bayer matrix texture
-    const bayer = new Uint8Array([
-      0,128,32,160,8,136,40,168,
-      192,64,224,96,200,72,232,104,
-      48,176,16,144,56,184,24,152,
-      240,112,208,80,248,120,216,88,
-      12,140,44,172,4,132,36,164,
-      204,76,236,108,196,68,228,100,
-      60,188,28,156,52,180,20,148,
-      252,124,220,92,244,116,212,84
-    ]);
-    const bayerTex = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, bayerTex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 8, 8, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, bayer);
-    gl.uniform1i(gl.getUniformLocation(program, 'u_bayer'), 1);
+      // Bayer matrix texture
+      const bayer = new Uint8Array([
+        0,128,32,160,8,136,40,168,
+        192,64,224,96,200,72,232,104,
+        48,176,16,144,56,184,24,152,
+        240,112,208,80,248,120,216,88,
+        12,140,44,172,4,132,36,164,
+        204,76,236,108,196,68,228,100,
+        60,188,28,156,52,180,20,148,
+        252,124,220,92,244,116,212,84
+      ]);
+      const bayerTex = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, bayerTex);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, 8, 8, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, bayer);
+      gl.uniform1i(gl.getUniformLocation(program, 'u_bayer'), 1);
 
-    // Dither mode
-    const ditherModes = { gaussian: 0, atkinson: 1, noise: 2 };
-    const urlParams = new URLSearchParams(window.location.search);
-    const ditherParam = urlParams.get('dither');
-    const ditherMode = ditherModes[ditherParam] ?? ditherModes[DEFAULT_DITHER];
-    gl.uniform1i(gl.getUniformLocation(program, 'u_ditherMode'), ditherMode);
+      // Dither mode
+      const ditherModes = { gaussian: 0, atkinson: 1, noise: 2 };
+      const urlParams = new URLSearchParams(window.location.search);
+      const ditherParam = urlParams.get('dither');
+      const ditherMode = ditherModes[ditherParam] ?? ditherModes[DEFAULT_DITHER];
+      gl.uniform1i(gl.getUniformLocation(program, 'u_ditherMode'), ditherMode);
 
-    // Image texture
-    const texture = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
-
-    const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
-    const timeLoc = gl.getUniformLocation(program, 'u_time');
-
-    let startTime = performance.now();
-    let needsResize = true;
-
-    function render() {
-      if (needsResize) {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * window.devicePixelRatio;
-        canvas.height = rect.height * window.devicePixelRatio;
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform2f(resolutionLoc, canvas.width, canvas.height);
-        needsResize = false;
-      }
-
-      // Update time uniform for animation (2000 = half speed)
-      const elapsed = (performance.now() - startTime) / 2000.0;
-      gl.uniform1f(timeLoc, elapsed);
-
+      // Image texture
+      const texture = gl.createTexture();
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.uniform1i(gl.getUniformLocation(program, 'u_image'), 0);
 
-      requestAnimationFrame(render);
-    }
+      const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
+      const timeLoc = gl.getUniformLocation(program, 'u_time');
 
-    img.parentNode.replaceChild(canvas, img);
+      let startTime = performance.now();
+      let needsResize = true;
 
-    if (img.complete) {
+      function render() {
+        if (needsResize) {
+          const rect = canvas.getBoundingClientRect();
+          canvas.width = rect.width * window.devicePixelRatio;
+          canvas.height = rect.height * window.devicePixelRatio;
+          gl.viewport(0, 0, canvas.width, canvas.height);
+          gl.uniform2f(resolutionLoc, canvas.width, canvas.height);
+          needsResize = false;
+        }
+
+        // Update time uniform for animation (2000 = half speed)
+        const elapsed = (performance.now() - startTime) / 2000.0;
+        gl.uniform1f(timeLoc, elapsed);
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        requestAnimationFrame(render);
+      }
+
+      // Replace image with canvas and start rendering
+      img.parentNode.replaceChild(canvas, img);
       render();
-    } else {
-      img.onload = render;
+
+      window.addEventListener('resize', function() {
+        needsResize = true;
+      });
     }
 
-    window.addEventListener('resize', function() {
-      needsResize = true;
-    });
+    // Ensure image is loaded before setup (fixes race condition)
+    if (img.complete && img.naturalWidth > 0) {
+      setup();
+    } else {
+      img.onload = setup;
+    }
   }
 
   // Initialize all dithered images when DOM is ready

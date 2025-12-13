@@ -1,11 +1,11 @@
 # About
 
-The world is not in a happy place and neither are my thoughts on society.  I'm
-am not be much of a writer, but bringing my thoughts to paper is my way of
-understanding and working with the world around me.  Since what is happening
-right now is far from the ordinary, and far darker than what I thought I would
-write about, I created this other space to share my thoughts.
+<img src="/static/avatar-large.jpg" width="256" height="256" style="float: right; margin-left: 20px; margin-bottom: 20px" alt="Picture of me" class="dithered-image">
 
-This is also not a diary as much as it should be seen as a commonplace book.  It
-contains whatever was on my mind, but specifically to understand the times we
-are in.
+The world is not in a good place, and neither are my thoughts about it.
+Bringing my thoughts to paper is my way of understanding what is happening
+around me.  What we are living through is not ordinary, and it is darker than I
+ever expected to put into words.
+
+This is also not a diary as much as it should be seen as a commonplace book.
+It's fragments, reflections and observations of the day.
