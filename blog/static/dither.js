@@ -291,6 +291,8 @@
 // Dithered image effect for .dithered-image elements
 (function() {
   const DEFAULT_DITHER = 'atkinson';
+  const FRAME_INTERVAL = 50; // ~20fps for subtle animation
+  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // Fragment shader with border fade + noise for jagged edges
   const fsSourceImage = `
@@ -492,8 +494,25 @@
 
       let startTime = performance.now();
       let needsResize = true;
+      let isVisible = true;
+      let lastFrameTime = 0;
+      let animationId = null;
 
-      function render() {
+      // Upload texture once (image is static)
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+
+      function render(timestamp) {
+        // Throttle to ~10fps
+        if (timestamp - lastFrameTime < FRAME_INTERVAL) {
+          if (isVisible && !REDUCED_MOTION) {
+            animationId = requestAnimationFrame(render);
+          }
+          return;
+        }
+        lastFrameTime = timestamp;
+
         if (needsResize) {
           const rect = canvas.getBoundingClientRect();
           canvas.width = rect.width * window.devicePixelRatio;
@@ -507,17 +526,31 @@
         const elapsed = (performance.now() - startTime) / 2000.0;
         gl.uniform1f(timeLoc, elapsed);
 
-        gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-        requestAnimationFrame(render);
+        // Continue animation only if visible and motion allowed
+        if (isVisible && !REDUCED_MOTION) {
+          animationId = requestAnimationFrame(render);
+        }
       }
 
-      // Replace image with canvas and start rendering
+      // Replace image with canvas
       img.parentNode.replaceChild(canvas, img);
-      render();
+
+      // Initial render
+      render(performance.now());
+
+      // Pause animation when off-screen
+      const observer = new IntersectionObserver(function(entries) {
+        isVisible = entries[0].isIntersecting;
+        if (isVisible && !REDUCED_MOTION && !animationId) {
+          animationId = requestAnimationFrame(render);
+        } else if (!isVisible && animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+      }, { threshold: 0 });
+      observer.observe(canvas);
 
       window.addEventListener('resize', function() {
         needsResize = true;
