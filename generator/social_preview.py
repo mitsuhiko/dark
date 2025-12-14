@@ -51,7 +51,7 @@ class SocialPreviewGenerator:
 
     def _load_avatar_optional(self):
         """Load avatar image if it exists, otherwise return None."""
-        avatar_path = self.project_folder / "static" / "avatar-large.jpg"
+        avatar_path = self.project_folder / "static" / "avatar-colorized.jpg"
         if not avatar_path.exists():
             return None
 

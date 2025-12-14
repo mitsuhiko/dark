@@ -1,6 +1,6 @@
 # About
 
-<img src="/static/avatar-large.jpg" width="256" height="256" style="float: right; margin-left: 20px; margin-bottom: 20px" alt="Picture of me" class="dithered-image">
+<img src="/static/avatar-colorized.jpg" width="256" height="256" style="float: right; margin-left: 20px; margin-bottom: 20px" alt="Picture of me" class="dithered-image">
 
 My name is Armin Ronacher!  Normally I [write about
 tech](https://lucumr.pocoo.org/) but this here is an alternative online presence
