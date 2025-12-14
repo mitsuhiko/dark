@@ -425,7 +425,11 @@
       }
 
       const gl = canvas.getContext('webgl');
-      if (!gl) return;
+      if (!gl) {
+        img.classList.remove('dithered-image');
+        img.style.visibility = 'visible';
+        return;
+      }
 
       const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
       const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSourceImage);
@@ -497,6 +501,37 @@
       let isVisible = true;
       let lastFrameTime = 0;
       let animationId = null;
+      let didCleanup = false;
+      let observer = null;
+      const loseContext = gl.getExtension('WEBGL_lose_context');
+
+      function cleanup() {
+        if (didCleanup) return;
+        didCleanup = true;
+
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+
+        if (observer) {
+          observer.disconnect();
+          observer = null;
+        }
+
+        window.removeEventListener('resize', onResize);
+        if (loseContext) {
+          loseContext.loseContext();
+        }
+
+        delete canvas.__darkDitherCleanup;
+      }
+
+      function onResize() {
+        needsResize = true;
+      }
+
+      canvas.__darkDitherCleanup = cleanup;
 
       // Upload texture once (image is static)
       gl.activeTexture(gl.TEXTURE0);
@@ -504,6 +539,11 @@
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 
       function render(timestamp) {
+        if (!canvas.isConnected) {
+          cleanup();
+          return;
+        }
+
         // Throttle to ~10fps
         if (timestamp - lastFrameTime < FRAME_INTERVAL) {
           if (isVisible && !REDUCED_MOTION) {
@@ -535,13 +575,22 @@
       }
 
       // Replace image with canvas
+      if (!img.parentNode) {
+        cleanup();
+        return;
+      }
       img.parentNode.replaceChild(canvas, img);
 
       // Initial render
       render(performance.now());
 
       // Pause animation when off-screen
-      const observer = new IntersectionObserver(function(entries) {
+      observer = new IntersectionObserver(function(entries) {
+        if (!canvas.isConnected) {
+          cleanup();
+          return;
+        }
+
         isVisible = entries[0].isIntersecting;
         if (isVisible && !REDUCED_MOTION && !animationId) {
           animationId = requestAnimationFrame(render);
@@ -552,9 +601,7 @@
       }, { threshold: 0 });
       observer.observe(canvas);
 
-      window.addEventListener('resize', function() {
-        needsResize = true;
-      });
+      window.addEventListener('resize', onResize);
     }
 
     // Ensure image is loaded before setup (fixes race condition)
@@ -565,14 +612,30 @@
     }
   }
 
-  // Initialize all dithered images when DOM is ready
-  function init() {
-    document.querySelectorAll('.dithered-image').forEach(initDitheredImage);
+  // Initialize all dithered images (re-run after PJAX navigations)
+  function init(root) {
+    (root || document)
+      .querySelectorAll('.dithered-image')
+      .forEach(initDitheredImage);
+  }
+
+  function initDocument() {
+    init(document);
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initDocument);
   } else {
-    init();
+    initDocument();
   }
+
+  document.addEventListener('dark:content-updated', initDocument);
+  document.addEventListener('dark:content-will-update', () => {
+    document.querySelectorAll('div.body canvas').forEach((canvas) => {
+      const cleanup = canvas.__darkDitherCleanup;
+      if (typeof cleanup === 'function') {
+        cleanup();
+      }
+    });
+  });
 })();

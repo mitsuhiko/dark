@@ -43,10 +43,16 @@
     </div>
     <script src="/static/dither.js"></script>
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
+      function updateDateWarning() {
         const dateEl = document.querySelector("p.date");
         if (dateEl) {
+          if (dateEl.querySelector(".date-warning")) {
+            return;
+          }
           const pubDate = new Date(dateEl.dataset.date);
+          if (Number.isNaN(pubDate.getTime())) {
+            return;
+          }
           const now = new Date();
           const dayDiff = Math.floor((now.getTime() - pubDate.getTime()) / (1000 * 60 * 60 * 24));
           const yearDiff = Math.floor(dayDiff / 365);
@@ -59,8 +65,12 @@
             dateEl.appendChild(warning);
           }
         }
-      });
+      }
+
+      document.addEventListener("DOMContentLoaded", updateDateWarning);
+      document.addEventListener("dark:content-updated", updateDateWarning);
     </script>
+    <script src="/static/navigation.js"></script>
     <div class=container>
       <div class=header>
         <a href="/">Dark Thoughts</a>
