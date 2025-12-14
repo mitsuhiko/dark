@@ -232,6 +232,11 @@ canvas.full-width {
   width: 100%;
 }
 
+/* hide dithered images until JS replaces them with canvas */
+img.dithered-image {
+  visibility: hidden;
+}
+
 /* tag cloud styles */
 .tag-link {
   position: relative;

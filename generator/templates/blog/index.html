@@ -10,6 +10,7 @@
         <h1><a href="{{ link_to('page', slug=entry.slug) }}">{{ entry.title }}</a></h1>
         {% if entry.summary %}
         <div class=summary>{{ entry.render_summary() }}</div>
+        <a href="{{ link_to('page', slug=entry.slug) }}">&raquo;</a>
         {% endif %}
       </div>
     </div>
