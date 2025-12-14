@@ -35,6 +35,16 @@
     {% endblock %}
     <meta name="twitter:creator" content="@mitsuhiko">
     <link rel="me" href="https://hachyderm.io/@mitsuhiko">
+    <script type="speculationrules">
+      {
+        "prefetch": [
+          {
+            "where": { "href_matches": "/*" },
+            "eagerness": "moderate"
+          }
+        ]
+      }
+    </script>
   {% endblock %}
   </head>
   <body>
