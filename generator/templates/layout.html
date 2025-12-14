@@ -11,16 +11,30 @@
     <link rel="{{ link.rel }}" href="{{ link.href }}"{%
       if link.media %} media="{{ link.media }}"{% endif %} type="{{ link.type }}">
     {%- endfor %}
+    <link rel="apple-touch-icon" sizes="300x300" href="/static/avatar-large.jpg">
+    <link rel="icon" type="image/png" sizes="300x300" href="/static/avatar-large.jpg">
+    {% block social_image %}
+    <meta name="twitter:image" content="https://dark.ronacher.eu/static/avatar-large.jpg">
+    <meta property="og:image" content="https://dark.ronacher.eu/static/avatar-large.jpg">
+    {% endblock %}
     <link rel="stylesheet" href="/static/fonts.css" type="text/css">
     <link rel="stylesheet" href="/static/style-2025.css" type="text/css">
     <link rel="stylesheet" href="/static/_pygments.css" type="text/css">
     <noscript><style>img.dithered-image { visibility: visible; }</style></noscript>
     <meta name="title" content="{{ self.title() }}">
     <meta property="og:title" content="{{ self.title() }}">
-    <meta property="og:site_name" content="dark">
+    <meta property="og:site_name" content="Dark Thoughts">
+    <meta name="twitter:site" content="@mitsuhiko">
+    <meta name="twitter:url" content="https://dark.ronacher.eu{{ slug }}">
+    <meta property="og:url" content="https://dark.ronacher.eu{{ slug }}">
+    <link rel="canonical" href="https://dark.ronacher.eu{{ slug }}">
+    <meta name="twitter:title" content="{{ self.title() }}">
+    <meta name="twitter:domain" content="https://dark.ronacher.eu/">
     {% block twitter_card %}
     <meta name="twitter:card" content="summary">
     {% endblock %}
+    <meta name="twitter:creator" content="@mitsuhiko">
+    <link rel="me" href="https://hachyderm.io/@mitsuhiko">
   {% endblock %}
   </head>
   <body>

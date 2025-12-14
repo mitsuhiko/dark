@@ -1,7 +1,7 @@
 # Configuration - all hardcoded values in one place
 CONFIG = {
     "site_title": "Dark Thoughts",
-    "site_url": "https://dark.example.com/",
+    "site_url": "https://dark.ronacher.eu/",
     "author": "Armin Ronacher",
     "subtitle": "A dark blog.",
     "posts_per_page": 10,
