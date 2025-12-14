@@ -341,10 +341,18 @@
       canvas.className = img.className.replace('dithered-image', '').trim();
       canvas.style.cssText = img.style.cssText;
 
-      // Image is loaded, dimensions are now valid
-      const imgRect = img.getBoundingClientRect();
-      canvas.style.width = imgRect.width + 'px';
-      canvas.style.height = imgRect.height + 'px';
+      // Copy width/height attributes if the image has them (for fixed-size images)
+      // Otherwise, let CSS handle responsive sizing with aspect-ratio
+      if (img.hasAttribute('width')) {
+        canvas.style.width = img.getAttribute('width') + 'px';
+      }
+      if (img.hasAttribute('height')) {
+        canvas.style.height = img.getAttribute('height') + 'px';
+      }
+      // Set aspect ratio from image's natural dimensions for responsive sizing
+      if (img.naturalWidth && img.naturalHeight) {
+        canvas.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight;
+      }
 
       const gl = canvas.getContext('webgl');
       if (!gl) return;

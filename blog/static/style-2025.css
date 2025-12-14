@@ -227,7 +227,8 @@ span.upcoming-indicator {
 }
 
 /* images */
-img.full-width {
+img.full-width,
+canvas.full-width {
   width: 100%;
 }
 

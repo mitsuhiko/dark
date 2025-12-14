@@ -8,7 +8,7 @@ from generator.builder import Builder
 from generator.watcher import BackgroundBuilder
 
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 5001
 
 # Global dictionary to track reload events by connection ID
