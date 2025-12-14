@@ -342,10 +342,10 @@
       vec2 uv = gl_FragCoord.xy / u_resolution;
       float edgeNoise = hash(gl_FragCoord.xy * 0.5) * 0.15;
 
-      float fadeLeft = smoothstep(0.0, 0.15 + edgeNoise, uv.x);
-      float fadeRight = smoothstep(0.0, 0.15 + edgeNoise, 1.0 - uv.x);
-      float fadeBottom = smoothstep(0.0, 0.15 + edgeNoise, uv.y);
-      float fadeTop = smoothstep(0.0, 0.15 + edgeNoise, 1.0 - uv.y);
+      float fadeLeft = smoothstep(0.0, 0.1 + edgeNoise, uv.x);
+      float fadeRight = smoothstep(0.0, 0.1 + edgeNoise, 1.0 - uv.x);
+      float fadeBottom = smoothstep(0.0, 0.1 + edgeNoise, uv.y);
+      float fadeTop = smoothstep(0.0, 0.1 + edgeNoise, 1.0 - uv.y);
 
       float fade = fadeLeft * fadeRight * fadeBottom * fadeTop;
       gray *= fade;

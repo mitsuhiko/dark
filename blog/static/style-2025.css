@@ -162,6 +162,8 @@ img.align-center                    { margin: 15px auto; display: block; }
 img.align-right                     { margin: 5px 0 5px 15px; display: block; float: right; }
 .figure.align-center                { text-align: center; }
 .figure p.caption                   { font-size: 14px; margin-top: 0; }
+figcaption                          { font-size: 0.9em; text-align: center;
+                                      color: var(--faded-color); margin-top: -8px; font-style: italic; }
 
 /* pagination */
 div.pagination          { margin: 36px 0 0 0; text-align: center; }
