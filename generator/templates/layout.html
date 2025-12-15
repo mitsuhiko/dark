@@ -47,12 +47,16 @@
     </script>
   {% endblock %}
   </head>
-  <body>
+  <body hx-boost="true" hx-ext="head-support" hx-select="div.body" hx-target="div.body" hx-swap="innerHTML show:window:top">
     <div class="header-image">
       <canvas id="header-canvas"></canvas>
     </div>
     <script src="/static/dither.js"></script>
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/htmx-head-support.js"></script>
     <script>
+      htmx.config.scrollIntoViewOnBoost = true;
+
       function updateDateWarning() {
         const dateEl = document.querySelector("p.date");
         if (dateEl) {
@@ -78,9 +82,8 @@
       }
 
       document.addEventListener("DOMContentLoaded", updateDateWarning);
-      document.addEventListener("dark:content-updated", updateDateWarning);
+      document.addEventListener("htmx:afterSettle", updateDateWarning);
     </script>
-    <script src="/static/navigation.js"></script>
     <div class=container>
       <div class=header>
         <a href="/">Dark Thoughts</a>

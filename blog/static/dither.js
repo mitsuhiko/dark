@@ -629,8 +629,8 @@
     initDocument();
   }
 
-  document.addEventListener('dark:content-updated', initDocument);
-  document.addEventListener('dark:content-will-update', () => {
+  document.addEventListener('htmx:afterSettle', initDocument);
+  document.addEventListener('htmx:beforeSwap', () => {
     document.querySelectorAll('div.body canvas').forEach((canvas) => {
       const cleanup = canvas.__darkDitherCleanup;
       if (typeof cleanup === 'function') {

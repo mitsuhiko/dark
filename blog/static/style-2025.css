@@ -19,50 +19,6 @@
   --date-warning-text-color: #e8b87a;
 }
 
-/* view transitions (progressive enhancement) */
-@supports (view-transition-name: none) {
-  div.body { view-transition-name: page-body; }
-
-  @keyframes page-fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes page-fade-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-  }
-
-  /* Fade only the main content, keep site chrome stable. */
-  ::view-transition-old(page-body) {
-    animation: page-fade-out 180ms ease both;
-    mix-blend-mode: normal;
-  }
-
-  ::view-transition-new(page-body) {
-    animation: page-fade-in 180ms ease both;
-    mix-blend-mode: normal;
-  }
-
-  /* Disable group animation to prevent position/size interpolation. */
-  ::view-transition-group(page-body) {
-    animation: none;
-  }
-
-  /* Don't cross-fade the full document. */
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    ::view-transition-old(page-body),
-    ::view-transition-new(page-body) {
-      animation: none;
-    }
-  }
-}
-
 /* header image */
 .header-image {
   position: relative;
