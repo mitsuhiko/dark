@@ -194,13 +194,12 @@
 
       syncHead(newDoc);
       syncBody(newDoc);
-      scrollToLocation(url, fallbackScrollY);
     }
 
     const transition = document.startViewTransition(update);
 
-    const onReady = transition.ready || transition.updateCallbackDone || Promise.resolve();
-    onReady.then(() => {
+    transition.finished.then(() => {
+      scrollToLocation(url, fallbackScrollY);
       document.dispatchEvent(new Event("dark:content-updated"));
     });
   }

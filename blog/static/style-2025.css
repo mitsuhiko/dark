@@ -44,6 +44,11 @@
     mix-blend-mode: normal;
   }
 
+  /* Disable group animation to prevent position/size interpolation. */
+  ::view-transition-group(page-body) {
+    animation: none;
+  }
+
   /* Don't cross-fade the full document. */
   ::view-transition-old(root),
   ::view-transition-new(root) {
@@ -116,7 +121,7 @@ h1 a, h2 a, h3 a, h4 a,
 h5 a, h6 a                  { text-decoration: none; }
 h1 a:hover, h2 a:hover,
 h3 a:hover, h4 a:hover      { text-decoration: underline; }
-h1                          { margin: 15px 0 25px 0; }
+h1                          { margin: 0 0 25px 0; }
 h2                          { margin: 25px 0 10px 0; }
 h3                          { margin: 35px 0 10px 0; }
 h1                          { font-size: 52px; line-height: 56px; text-wrap: balance; }
@@ -135,7 +140,8 @@ div.navigation              { float: right; }
 div.header, div.navigation  { height: 25px; margin-bottom: 42px; }
 div.navigation ul           { margin: 0; padding: 0; list-style: none; }
 div.navigation ul li        { display: inline; margin: 0 2px; padding: 0; }
-div.body                    { clear: both; margin: 0; line-height: 1.6; text-wrap: pretty; }
+div.body                    { clear: both; margin: 0; line-height: 1.6; text-wrap: pretty;
+                              display: flow-root; /* prevent margin collapse for view transitions */ }
 div.footer                  { margin-top: 55px; font-size: 19px; clear: both;
                               text-align: right; color: var(--faded-color); }
 div.footer p                { margin: 0; }
