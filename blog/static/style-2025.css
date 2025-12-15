@@ -121,7 +121,7 @@ h1 a, h2 a, h3 a, h4 a,
 h5 a, h6 a                  { text-decoration: none; }
 h1 a:hover, h2 a:hover,
 h3 a:hover, h4 a:hover      { text-decoration: underline; }
-h1                          { margin: 0 0 25px 0; }
+h1                          { margin: 5px 0 25px 0; }
 h2                          { margin: 25px 0 10px 0; }
 h3                          { margin: 35px 0 10px 0; }
 h1                          { font-size: 52px; line-height: 56px; text-wrap: balance; }

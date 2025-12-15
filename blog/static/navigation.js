@@ -196,12 +196,14 @@
       syncBody(newDoc);
     }
 
-    const transition = document.startViewTransition(update);
-
-    transition.finished.then(() => {
+    try {
+      const transition = document.startViewTransition(update);
+      await transition.finished;
       scrollToLocation(url, fallbackScrollY);
       document.dispatchEvent(new Event("dark:content-updated"));
-    });
+    } catch {
+      window.location.assign(url.href);
+    }
   }
 
   document.addEventListener(
