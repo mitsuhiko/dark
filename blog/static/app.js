@@ -639,3 +639,23 @@
     });
   });
 })();
+
+// htmx configuration
+(function() {
+  htmx.config.scrollIntoViewOnBoost = true;
+
+  // Fall back to native navigation on htmx errors
+  function htmxFallbackToNative(evt) {
+    var path = evt.detail.pathInfo?.requestPath || evt.detail.requestConfig?.path;
+    if (path) {
+      window.location.href = path;
+    }
+  }
+
+  // Network error (offline, DNS failure, etc.)
+  htmx.on('htmx:sendError', htmxFallbackToNative);
+  // Swap error (invalid HTML, can't find target, etc.)
+  htmx.on('htmx:swapError', htmxFallbackToNative);
+  // Server error responses (4xx, 5xx) - let browser handle natively
+  htmx.on('htmx:responseError', htmxFallbackToNative);
+})();

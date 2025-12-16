@@ -51,12 +51,10 @@
     <div class="header-image">
       <canvas id="header-canvas"></canvas>
     </div>
-    <script src="/static/dither.js"></script>
     <script src="/static/htmx.min.js"></script>
     <script src="/static/htmx-head-support.js"></script>
+    <script src="/static/app.js"></script>
     <script>
-      htmx.config.scrollIntoViewOnBoost = true;
-
       function updateDateWarning() {
         const dateEl = document.querySelector("p.date");
         if (dateEl) {
