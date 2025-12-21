@@ -294,7 +294,7 @@
   const FRAME_INTERVAL = 50; // ~20fps for subtle animation
   const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Fragment shader with border fade + noise for jagged edges
+  // Fragment shader with border fade + noise for jagged edges (10% proportional fade)
   const fsSourceImage = `
     precision highp float;
     uniform sampler2D u_image;
@@ -384,6 +384,91 @@
     }
   `;
 
+  // Fragment shader with 10px pixel-based fade (for dithered-image-alt)
+  const fsSourceImageAlt = `
+    precision highp float;
+    uniform sampler2D u_image;
+    uniform sampler2D u_bayer;
+    uniform vec2 u_resolution;
+    uniform int u_ditherMode;
+    uniform float u_time;
+    varying vec2 v_texCoord;
+
+    float hash(vec2 p) {
+      vec3 p3 = fract(vec3(p.xyx) * 0.1031);
+      p3 += dot(p3, p3.yzx + 33.33);
+      return fract((p3.x + p3.y) * p3.z);
+    }
+
+    float animatedNoise(vec2 p, float t) {
+      float n1 = hash(p + floor(t));
+      float n2 = hash(p + floor(t) + 1.0);
+      float blend = fract(t);
+      return mix(n1, n2, smoothstep(0.0, 1.0, blend));
+    }
+
+    float atkinsonThreshold(vec2 pos) {
+      int x = int(mod(pos.x, 4.0));
+      int y = int(mod(pos.y, 4.0));
+      int idx = y * 4 + x;
+      float thresholds[16];
+      thresholds[0] = 0.0;    thresholds[1] = 12.0;  thresholds[2] = 3.0;   thresholds[3] = 15.0;
+      thresholds[4] = 8.0;   thresholds[5] = 4.0;   thresholds[6] = 11.0;  thresholds[7] = 7.0;
+      thresholds[8] = 2.0;   thresholds[9] = 14.0;  thresholds[10] = 1.0;  thresholds[11] = 13.0;
+      thresholds[12] = 10.0; thresholds[13] = 6.0;  thresholds[14] = 9.0;  thresholds[15] = 5.0;
+      for (int i = 0; i < 16; i++) {
+        if (i == idx) return thresholds[i] / 16.0;
+      }
+      return 0.0;
+    }
+
+    void main() {
+      vec4 color = texture2D(u_image, v_texCoord);
+      float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+
+      // Calculate pixel distance from edges (10px fade with 3px noise variation)
+      float distLeft = gl_FragCoord.x;
+      float distRight = u_resolution.x - gl_FragCoord.x;
+      float distBottom = gl_FragCoord.y;
+      float distTop = u_resolution.y - gl_FragCoord.y;
+
+      float fadeWidth = 10.0;
+      float edgeNoise = hash(gl_FragCoord.xy * 0.5) * 3.0;
+
+      float fadeLeft = smoothstep(0.0, fadeWidth + edgeNoise, distLeft);
+      float fadeRight = smoothstep(0.0, fadeWidth + edgeNoise, distRight);
+      float fadeBottom = smoothstep(0.0, fadeWidth + edgeNoise, distBottom);
+      float fadeTop = smoothstep(0.0, fadeWidth + edgeNoise, distTop);
+
+      float fade = fadeLeft * fadeRight * fadeBottom * fadeTop;
+      gray *= fade;
+
+      float threshold;
+      if (u_ditherMode == 2) {
+        threshold = hash(gl_FragCoord.xy);
+      } else if (u_ditherMode == 1) {
+        gray = gray * 1.2 - 0.1;
+        gray = clamp(gray, 0.0, 1.0);
+        threshold = atkinsonThreshold(gl_FragCoord.xy);
+      } else {
+        vec2 bayerCoord = mod(gl_FragCoord.xy, 8.0) / 8.0;
+        threshold = texture2D(u_bayer, bayerCoord).r;
+      }
+
+      vec2 noiseCoord = gl_FragCoord.xy * 0.15;
+      float noise = animatedNoise(noiseCoord, u_time) - 0.5;
+      float flicker = 0.08 * sin(u_time * 2.0 + hash(gl_FragCoord.xy * 0.2) * 6.28);
+      float effectIntensity = smoothstep(0.05, 0.3, gray);
+      float animatedThreshold = threshold + 0.1 + (noise * 0.15 + flicker) * effectIntensity;
+      float dithered = step(animatedThreshold, gray);
+
+      vec3 dark = vec3(0.067);
+      vec3 cream = vec3(0.91, 0.835, 0.718);
+
+      gl_FragColor = vec4(mix(dark, cream, dithered), 1.0);
+    }
+  `;
+
   const vsSource = `
     attribute vec2 a_position;
     attribute vec2 a_texCoord;
@@ -407,8 +492,9 @@
   function initDitheredImage(img) {
     // Wait for image to load before setting up canvas
     function setup() {
+      const isAlt = img.classList.contains('dithered-image-alt');
       const canvas = document.createElement('canvas');
-      canvas.className = img.className.replace('dithered-image', '').trim();
+      canvas.className = img.className.replace('dithered-image-alt', '').replace('dithered-image', '').trim();
       canvas.style.cssText = img.style.cssText;
 
       // Copy width/height attributes if the image has them (for fixed-size images)
@@ -427,12 +513,13 @@
       const gl = canvas.getContext('webgl');
       if (!gl) {
         img.classList.remove('dithered-image');
+        img.classList.remove('dithered-image-alt');
         img.style.visibility = 'visible';
         return;
       }
 
       const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
-      const fs = createShader(gl, gl.FRAGMENT_SHADER, fsSourceImage);
+      const fs = createShader(gl, gl.FRAGMENT_SHADER, isAlt ? fsSourceImageAlt : fsSourceImage);
       const program = gl.createProgram();
       gl.attachShader(program, vs);
       gl.attachShader(program, fs);
@@ -615,7 +702,7 @@
   // Initialize all dithered images (re-run after PJAX navigations)
   function init(root) {
     (root || document)
-      .querySelectorAll('.dithered-image')
+      .querySelectorAll('.dithered-image, .dithered-image-alt')
       .forEach(initDitheredImage);
   }
 
