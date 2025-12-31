@@ -108,4 +108,4 @@ that tastes are subject to change.
 > begging on Saturday afternoon if he wishes to turn the labor of his hands to
 > account -- he must beg the Jewish furniture dealer. (Very right!)
 >
-> -- Karl Luegers, Mayor of Vienna, 1899
+> -- Karl Luegers, Mayor of Vienna, in a speech to the Christian Socialist Workers' Association, 1899
