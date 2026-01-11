@@ -62,7 +62,7 @@ vibes-killing, as the reason society is supposedly falling apart.  The people
 pointing at problems are blamed for the problems themselves and if for whatever
 reason the blame cannot be placed there, then it's other countries.
 
-That many of these billionaires themselves were immigrants, benefiting from
+Many of these billionaires themselves were immigrants, benefiting from
 America's immigration system of the past, now they are willing to dismantle it
 for others.
 
