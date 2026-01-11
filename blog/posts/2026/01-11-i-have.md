@@ -76,12 +76,14 @@ And what does that alignment buy silence on?
 
 People are now powering through any controversy that stands in the way.  An
 innocent woman who was killed by an ICE officer?  That person was being attacked
-and described as the agitator.  The victim was attacked online for being gay, for
-being at the wrong spot, for having not considered her children and provoked the
-situation.  Anyone was at fault, other than the person that pulled the trigger.
-It really shows how much of humanity is quickly losing out.  ICE operates with
-impunity and with full backing of the administration, even if they cause the
-deaths and harm to innocents.
+and [described as the
+agitator](https://www.reuters.com/world/us/jd-vance-takes-lead-defending-minnesota-ice-shooting-dares-democrats-engage-2026-01-08/).
+The victim was attacked online for being gay, for being at the wrong spot, for
+having not considered her children and provoked the situation.  Anyone was at
+fault, other than the person that pulled the trigger. It really shows how much
+of humanity is quickly losing out.  ICE operates with impunity and with full
+backing of the administration, even if they cause the deaths and harm to
+innocents.
 
 What billionaires believe about themselves, America now believes about itself.
 Might is right and [it's now foreign
