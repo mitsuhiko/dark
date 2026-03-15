@@ -83,7 +83,7 @@ social media.  Dead kid after dead kid came with family pictures.  Killed in
 what looked like your average European country or house.
 
 Iran and Lebanon feel very similar.  The people there too have Instagram
-accounts and social media even if the Iranian government tries its best
+accounts and social media, even if the Iranian government tries its best
 to keep the internet turned off.  People in Iran and Lebanon are highly
 educated, many speak English.  Not that this matters, because the US has a
 lot of blood on its hands from the very beginning.  They need to justify
