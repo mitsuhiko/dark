@@ -29,7 +29,8 @@ What I want to talk about is not the war itself, but the tone.
 > him to win and come home. That's why we do it. Palantir is very helpful in
 > delivering this."
 >
-> — Cameron Stanley, Chief Digital and Artificial Intelligence Officer of the Department of War
+> — [Cameron Stanley](https://x.com/PalantirTech/status/2032142541131288835),
+> Chief Digital and Artificial Intelligence Officer of the Department of War
 
 That is Cameron Stanley proudly demonstrating Palantir's [Maven Smart
 System](https://x.com/PalantirTech/status/2032142543022960980).  Clearly great
