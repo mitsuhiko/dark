@@ -29,12 +29,203 @@
 })();
 
 (function() {
+  let cachedCanvasAlphaWorks = null;
+
+  function parseCssChannel(value) {
+    value = value.trim();
+    if (value.endsWith('%')) {
+      return parseFloat(value) * 2.55;
+    }
+    return parseFloat(value);
+  }
+
+  function parseCssAlpha(value) {
+    value = value.trim();
+    if (value.endsWith('%')) {
+      return parseFloat(value) / 100;
+    }
+    return parseFloat(value);
+  }
+
+  function parseCssUnitInterval(value) {
+    value = value.trim();
+    if (value.endsWith('%')) {
+      return parseFloat(value) / 100;
+    }
+    return parseFloat(value);
+  }
+
+  function parseCssColor(color) {
+    if (!color) return null;
+    color = color.trim().toLowerCase();
+    if (color === 'transparent') return [0, 0, 0, 0];
+
+    let match = color.match(/^rgba?\((.*)\)$/);
+    if (match) {
+      let channels;
+      let alpha = 1;
+      const body = match[1].trim();
+      if (body.includes(',')) {
+        const parts = body.split(/\s*,\s*/);
+        channels = parts.slice(0, 3).map(parseCssChannel);
+        if (parts[3] !== undefined) alpha = parseCssAlpha(parts[3]);
+      } else {
+        const parts = body.split('/');
+        channels = parts[0].trim().split(/\s+/).slice(0, 3).map(parseCssChannel);
+        if (parts[1] !== undefined) alpha = parseCssAlpha(parts[1]);
+      }
+      if (channels.length !== 3 || channels.some(Number.isNaN) || Number.isNaN(alpha)) return null;
+      return [
+        Math.min(Math.max(channels[0] / 255, 0), 1),
+        Math.min(Math.max(channels[1] / 255, 0), 1),
+        Math.min(Math.max(channels[2] / 255, 0), 1),
+        Math.min(Math.max(alpha, 0), 1)
+      ];
+    }
+
+    match = color.match(/^color\([a-z0-9-]+\s+([^\)]+)\)$/);
+    if (match) {
+      const parts = match[1].split('/');
+      const channels = parts[0].trim().split(/\s+/).slice(0, 3).map(parseCssUnitInterval);
+      const alpha = parts[1] === undefined ? 1 : parseCssAlpha(parts[1]);
+      if (channels.length !== 3 || channels.some(Number.isNaN) || Number.isNaN(alpha)) return null;
+      return [
+        Math.min(Math.max(channels[0], 0), 1),
+        Math.min(Math.max(channels[1], 0), 1),
+        Math.min(Math.max(channels[2], 0), 1),
+        Math.min(Math.max(alpha, 0), 1)
+      ];
+    }
+
+    return null;
+  }
+
+  function compositeColor(fg, bg) {
+    const alpha = fg[3] + bg[3] * (1 - fg[3]);
+    if (alpha <= 0) return [0, 0, 0, 0];
+    return [
+      (fg[0] * fg[3] + bg[0] * bg[3] * (1 - fg[3])) / alpha,
+      (fg[1] * fg[3] + bg[1] * bg[3] * (1 - fg[3])) / alpha,
+      (fg[2] * fg[3] + bg[2] * bg[3] * (1 - fg[3])) / alpha,
+      alpha
+    ];
+  }
+
+  function fallbackBackgroundColor() {
+    return window.darkThoughtsTheme.isLight()
+      ? [0xff / 255, 0xf8 / 255, 0xec / 255, 1]
+      : [0x11 / 255, 0x11 / 255, 0x11 / 255, 1];
+  }
+
+  function getBackdropColor(element) {
+    let node = element && element.nodeType === 1 ? element : document.documentElement;
+    if (!node.isConnected) node = document.documentElement;
+
+    const chain = [];
+    while (node && node.nodeType === 1) {
+      chain.push(node);
+      node = node.parentElement;
+    }
+
+    let color = [1, 1, 1, 1];
+    let foundColor = false;
+    for (let i = chain.length - 1; i >= 0; i--) {
+      const parsed = parseCssColor(getComputedStyle(chain[i]).backgroundColor);
+      if (parsed && parsed[3] > 0) {
+        foundColor = true;
+        color = compositeColor(parsed, color);
+      }
+    }
+
+    return foundColor ? color : fallbackBackgroundColor();
+  }
+
+  function isIOSWebKit() {
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+    const isiOS = /iP(?:hone|ad|od)/.test(platform) ||
+      (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    return isiOS && /AppleWebKit/.test(ua);
+  }
+
+  function contextHasAlphaBuffer(gl) {
+    const attrs = gl.getContextAttributes && gl.getContextAttributes();
+    if (!attrs || attrs.alpha === false) return false;
+
+    const previousClearColor = gl.getParameter(gl.COLOR_CLEAR_VALUE);
+    const pixel = new Uint8Array(4);
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+    gl.clearColor(previousClearColor[0], previousClearColor[1], previousClearColor[2], previousClearColor[3]);
+    return pixel[3] < 128;
+  }
+
+  function transparentCanvasComposites() {
+    if (cachedCanvasAlphaWorks !== null) return cachedCanvasAlphaWorks;
+
+    try {
+      const source = document.createElement('canvas');
+      source.width = 1;
+      source.height = 1;
+      const gl = source.getContext('webgl', {
+        alpha: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true
+      });
+      if (!gl || !contextHasAlphaBuffer(gl)) {
+        cachedCanvasAlphaWorks = false;
+        return cachedCanvasAlphaWorks;
+      }
+
+      const target = document.createElement('canvas');
+      target.width = 1;
+      target.height = 1;
+      const ctx = target.getContext('2d');
+      ctx.fillStyle = 'rgb(17, 34, 51)';
+      ctx.fillRect(0, 0, 1, 1);
+      ctx.drawImage(source, 0, 0);
+      const pixel = ctx.getImageData(0, 0, 1, 1).data;
+      cachedCanvasAlphaWorks = Math.abs(pixel[0] - 17) <= 1 &&
+        Math.abs(pixel[1] - 34) <= 1 &&
+        Math.abs(pixel[2] - 51) <= 1;
+
+      const loseContext = gl.getExtension('WEBGL_lose_context');
+      if (loseContext) loseContext.loseContext();
+    } catch {
+      cachedCanvasAlphaWorks = false;
+    }
+
+    return cachedCanvasAlphaWorks;
+  }
+
+  window.darkThoughtsShader = {
+    needsAlphaFallback(gl) {
+      if (!contextHasAlphaBuffer(gl)) return true;
+
+      // Mobile Safari can report an alpha-capable WebGL context but still
+      // composite transparent canvas pixels against white instead of the CSS
+      // backdrop.  In that case the shader has to flatten against the current
+      // background color itself.
+      if (isIOSWebKit()) return true;
+
+      return !transparentCanvasComposites();
+    },
+    setBackgroundUniform(gl, location, element) {
+      const color = getBackdropColor(element) || fallbackBackgroundColor();
+      gl.uniform3f(location, color[0], color[1], color[2]);
+    }
+  };
+})();
+
+(function() {
   // Default dither mode - can be overridden via URL parameter ?dither=gaussian|atkinson|noise
   const DEFAULT_DITHER = 'atkinson';
 
   const canvas = document.getElementById('header-canvas');
   const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
   if (!gl) return;
+  const alphaFallback = window.darkThoughtsShader.needsAlphaFallback(gl);
 
   const vsSource = `
     attribute vec2 a_position;
@@ -53,6 +244,8 @@
     uniform vec2 u_resolution;
     uniform int u_ditherMode;  // 0 = Gaussian, 1 = Atkinson, 2 = noise
     uniform float u_isLight;
+    uniform float u_alphaFallback;
+    uniform vec3 u_backgroundColor;
     varying vec2 v_texCoord;
 
     // Hash function for stable random noise
@@ -119,7 +312,11 @@
       vec3 lightInk = vec3(0.541, 0.329, 0.110); // #8a541c
       vec3 ink = mix(darkInk, lightInk, u_isLight);
       float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
-      gl_FragColor = vec4(ink, inkAlpha);
+      if (u_alphaFallback > 0.5) {
+        gl_FragColor = vec4(mix(u_backgroundColor, ink, inkAlpha), 1.0);
+      } else {
+        gl_FragColor = vec4(ink, inkAlpha);
+      }
     }
   `;
 
@@ -180,6 +377,9 @@
   const ditherMode = ditherModes[ditherParam] ?? ditherModes[DEFAULT_DITHER];
   gl.uniform1i(gl.getUniformLocation(program, 'u_ditherMode'), ditherMode);
   const isLightLoc = gl.getUniformLocation(program, 'u_isLight');
+  const alphaFallbackLoc = gl.getUniformLocation(program, 'u_alphaFallback');
+  const backgroundColorLoc = gl.getUniformLocation(program, 'u_backgroundColor');
+  gl.uniform1f(alphaFallbackLoc, alphaFallback ? 1.0 : 0.0);
 
   const video = document.createElement('video');
   video.crossOrigin = 'anonymous';
@@ -261,6 +461,9 @@
     const source = currentSource === 'video' ? video : fallbackImage;
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
     gl.uniform1f(isLightLoc, window.darkThoughtsTheme.isLight() ? 1.0 : 0.0);
+    if (alphaFallback) {
+      window.darkThoughtsShader.setBackgroundUniform(gl, backgroundColorLoc, canvas);
+    }
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     // Only keep animating if video is playing, otherwise static image is fine
     if (currentSource === 'video' && videoPlaying) {
@@ -268,10 +471,28 @@
     }
   }
 
+  let themeRepaintId = null;
   window.darkThoughtsTheme.onChange(function() {
     // Videos redraw continuously; static fallbacks need a manual repaint.
     if (!currentSource || !texture || (currentSource === 'video' && videoPlaying)) return;
     render();
+    if (alphaFallback) {
+      if (themeRepaintId) cancelAnimationFrame(themeRepaintId);
+      const started = performance.now();
+      function repaint() {
+        if (!currentSource || !texture || (currentSource === 'video' && videoPlaying)) {
+          themeRepaintId = null;
+          return;
+        }
+        render();
+        if (performance.now() - started < 350) {
+          themeRepaintId = requestAnimationFrame(repaint);
+        } else {
+          themeRepaintId = null;
+        }
+      }
+      themeRepaintId = requestAnimationFrame(repaint);
+    }
   });
 
   function tryPlayVideo() {
@@ -353,6 +574,8 @@
     uniform int u_ditherMode;
     uniform float u_time;
     uniform float u_isLight;
+    uniform float u_alphaFallback;
+    uniform vec3 u_backgroundColor;
     varying vec2 v_texCoord;
 
     float hash(vec2 p) {
@@ -436,7 +659,11 @@
       vec3 ink = mix(darkInk, lightInk, u_isLight);
       float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
 
-      gl_FragColor = vec4(ink, inkAlpha);
+      if (u_alphaFallback > 0.5) {
+        gl_FragColor = vec4(mix(u_backgroundColor, ink, inkAlpha), 1.0);
+      } else {
+        gl_FragColor = vec4(ink, inkAlpha);
+      }
     }
   `;
 
@@ -449,6 +676,8 @@
     uniform int u_ditherMode;
     uniform float u_time;
     uniform float u_isLight;
+    uniform float u_alphaFallback;
+    uniform vec3 u_backgroundColor;
     varying vec2 v_texCoord;
 
     float hash(vec2 p) {
@@ -525,7 +754,11 @@
       vec3 ink = mix(darkInk, lightInk, u_isLight);
       float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
 
-      gl_FragColor = vec4(ink, inkAlpha);
+      if (u_alphaFallback > 0.5) {
+        gl_FragColor = vec4(mix(u_backgroundColor, ink, inkAlpha), 1.0);
+      } else {
+        gl_FragColor = vec4(ink, inkAlpha);
+      }
     }
   `;
 
@@ -577,6 +810,7 @@
         img.style.visibility = 'visible';
         return;
       }
+      const alphaFallback = window.darkThoughtsShader.needsAlphaFallback(gl);
 
       const vs = createShader(gl, gl.VERTEX_SHADER, vsSource);
       const fs = createShader(gl, gl.FRAGMENT_SHADER, isAlt ? fsSourceImageAlt : fsSourceImage);
@@ -643,6 +877,9 @@
       const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
       const timeLoc = gl.getUniformLocation(program, 'u_time');
       const isLightLoc = gl.getUniformLocation(program, 'u_isLight');
+      const alphaFallbackLoc = gl.getUniformLocation(program, 'u_alphaFallback');
+      const backgroundColorLoc = gl.getUniformLocation(program, 'u_backgroundColor');
+      gl.uniform1f(alphaFallbackLoc, alphaFallback ? 1.0 : 0.0);
 
       let startTime = performance.now();
       let needsResize = true;
@@ -731,6 +968,9 @@
         const elapsed = (performance.now() - startTime) / 2000.0;
         gl.uniform1f(timeLoc, elapsed);
         gl.uniform1f(isLightLoc, window.darkThoughtsTheme.isLight() ? 1.0 : 0.0);
+        if (alphaFallback) {
+          window.darkThoughtsShader.setBackgroundUniform(gl, backgroundColorLoc, canvas);
+        }
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
