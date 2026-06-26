@@ -33,7 +33,7 @@
   const DEFAULT_DITHER = 'atkinson';
 
   const canvas = document.getElementById('header-canvas');
-  const gl = canvas.getContext('webgl');
+  const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
   if (!gl) return;
 
   const vsSource = `
@@ -88,8 +88,8 @@
       vec4 color = texture2D(u_image, sampleCoord);
       float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
-      // Fade to the page edge color at the bottom so the shader blends into
-      // the surrounding paper/background color.
+      // Fade to transparent at the bottom so the CSS page background shows
+      // through instead of being painted by the shader.
       float screenY = gl_FragCoord.y / u_resolution.y;
       float fade = smoothstep(0.0, 0.4, screenY);
       gray = mix(gray * fade, mix(1.0, gray, fade), u_isLight);
@@ -115,13 +115,11 @@
       float thresholdLevel = clamp(threshold + mix(0.1, -0.1, u_isLight), 0.001, 0.999);
       float dithered = step(thresholdLevel, gray);
 
-      vec3 darkBg = vec3(0.067);                 // #111
       vec3 darkInk = vec3(0.91, 0.835, 0.718);   // #e8d5b7
       vec3 lightInk = vec3(0.541, 0.329, 0.110); // #8a541c
-      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
-      vec3 low = mix(darkBg, lightInk, u_isLight);
-      vec3 high = mix(darkInk, lightPaper, u_isLight);
-      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
+      vec3 ink = mix(darkInk, lightInk, u_isLight);
+      float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
+      gl_FragColor = vec4(ink, inkAlpha);
     }
   `;
 
@@ -433,14 +431,12 @@
       float animatedThreshold = clamp(threshold + thresholdBias + (noise * 0.15 + flicker) * effectIntensity, 0.001, 0.999);
       float dithered = step(animatedThreshold, gray);
 
-      vec3 darkBg = vec3(0.067);
       vec3 darkInk = vec3(0.91, 0.835, 0.718);
       vec3 lightInk = vec3(0.541, 0.329, 0.110);
-      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
-      vec3 low = mix(darkBg, lightInk, u_isLight);
-      vec3 high = mix(darkInk, lightPaper, u_isLight);
+      vec3 ink = mix(darkInk, lightInk, u_isLight);
+      float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
 
-      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
+      gl_FragColor = vec4(ink, inkAlpha);
     }
   `;
 
@@ -524,14 +520,12 @@
       float animatedThreshold = clamp(threshold + thresholdBias + (noise * 0.15 + flicker) * effectIntensity, 0.001, 0.999);
       float dithered = step(animatedThreshold, gray);
 
-      vec3 darkBg = vec3(0.067);
       vec3 darkInk = vec3(0.91, 0.835, 0.718);
       vec3 lightInk = vec3(0.541, 0.329, 0.110);
-      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
-      vec3 low = mix(darkBg, lightInk, u_isLight);
-      vec3 high = mix(darkInk, lightPaper, u_isLight);
+      vec3 ink = mix(darkInk, lightInk, u_isLight);
+      float inkAlpha = mix(dithered, 1.0 - dithered, u_isLight);
 
-      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
+      gl_FragColor = vec4(ink, inkAlpha);
     }
   `;
 
@@ -576,7 +570,7 @@
         canvas.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight;
       }
 
-      const gl = canvas.getContext('webgl');
+      const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: false });
       if (!gl) {
         img.classList.remove('dithered-image');
         img.classList.remove('dithered-image-alt');
