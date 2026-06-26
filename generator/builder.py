@@ -105,6 +105,9 @@ class BlogPost:
     @property
     def output_path(self):
         """Output file path."""
+        if Path(self.source_path).as_posix() == "404.md":
+            return str(Path(CONFIG["output_folder"]) / "404.html")
+
         slug = self.slug.strip("/")
         if not slug:
             return str(Path(CONFIG["output_folder"]) / "index.html")
