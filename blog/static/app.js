@@ -82,7 +82,10 @@
     }
 
     void main() {
-      vec4 color = texture2D(u_image, v_texCoord);
+      // In light mode, mirror the source vertically so the naturally brighter
+      // top of the video lands at the bottom and blends into the page.
+      vec2 sampleCoord = vec2(v_texCoord.x, mix(v_texCoord.y, 1.0 - v_texCoord.y, u_isLight));
+      vec4 color = texture2D(u_image, sampleCoord);
       float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
       // Fade to the page edge color at the bottom so the shader blends into
@@ -208,7 +211,9 @@
     canvas.height = canvas.offsetHeight * window.devicePixelRatio;
     gl.viewport(0, 0, canvas.width, canvas.height);
 
-    // Calculate texture coords to show bottom of source (cover behavior)
+    // Calculate texture coords to show the bottom of the source in dark mode
+    // (cover behavior).  The fragment shader mirrors Y in light mode so the
+    // brighter top of the source lands near the page background.
     // With UNPACK_FLIP_Y_WEBGL=true: tex Y=0 is source bottom, Y=1 is source top
     const canvasAspect = canvas.width / canvas.height;
     const sourceAspect = sourceWidth / sourceHeight;
@@ -219,7 +224,7 @@
       texLeft = (1 - scale) / 2;
       texRight = 1 - texLeft;
     } else {
-      // Source is taller - crop top (keep bottom)
+      // Source is taller - crop top in dark mode (light mode mirrors this)
       const scale = sourceAspect / canvasAspect;
       texTop = scale;  // Only show bottom portion
       texBottom = 0;
