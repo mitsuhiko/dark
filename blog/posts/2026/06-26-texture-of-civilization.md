@@ -5,36 +5,36 @@ summary: Some of reality's hidden detail lives inside other people's lives.
 
 # The Texture of Civilization
 
-The Donauinsel, Vienna's Danube Island is a long artificial island, a piece of
-flood protection that also became a place for recreation.  People bike there,
-swim there, walk there, have a drink there.  If you live in Vienna for long
-enough, you probably think you know it.
+The [Donauinsel](https://en.wikipedia.org/wiki/Donauinsel), Vienna's Danube
+Island is a long artificial island, a piece of flood protection that also became
+a place for recreation.  People bike there, swim there, walk there, have a drink
+there.  If you live in Vienna for long enough, you probably think you know it.
 
 But then go there by bike at night and cycle slowly the entire length of it,
 with the intent to absorb and look, and suddenly the island is not one place but
 many.  There are families, immigrant communities and friends sharing food and
 drinks.  There are groups doing sports, people dancing, teenagers meeting
 friends, people making music, people watching a movie projected onto bridge
-pillars, people who clearly know exactly where to be and when.  Some of them are
-not there by accident and they come back weekly because they have rhythms and
-rituals.  Some of the island's life is private, messy, a little sketchy, or
-simply not meant for you.  Also a feature of public spaces that allow some
-amount of privacy in the dark.
+pillars, fishers patiently waiting, people who clearly know exactly where to be
+and when.  Many of them are not there by accident or spontaneously as they come
+back weekly because they have rhythms and rituals.  Some of the island's life is
+private, messy, a little sketchy, or simply not meant for you — also a feature
+of public spaces that allow some amount of privacy in the dark.
 
 <figure>
-  <img src="/static/images/donauinsel-movie.jpg" class="dithered-image full-width" alt="People watching a movie projected onto a bridge pillar on the Donauinsel at night">
-  <figcaption>A movie projected onto a bridge pillar on the Donauinsel.</figcaption>
+  <img src="/static/images/donauinsel-movie.jpg" class="dithered-image full-width" alt="People watching a movie projected onto a bridge pillar on the danube island at night">
+  <figcaption>A movie projected onto a bridge pillar on the danube island.</figcaption>
 </figure>
 
-The first temptation is to feel like you discovered something.  But that is not
+The first temptation is to feel like you discovered something.  But that
 quite right.  Even if you cycle there regularly, even if you start recognizing
 the same groups in the same places, you remain an observer to other people's
 experiences.  You mostly discovered that there is something you do not know.
 
 To me, passing by on a bicycle, you recognize the same people in the same spot,
 but for them it is a dense social experience.  They know who comes every week,
-who has not been around for a while, who is new, who is new, their children'
-school results.  They know the detail from the inside.
+who has not been around for a while, who is new, each other children' school
+results.  They know the detail from the inside.
 
 And so, cycling through the night on an island allows you to become a little
 visitor to other people's experiences and the presence of those experiences
@@ -58,12 +58,12 @@ leave a lasting imprint.  But that requires infrastructure in more than one
 sense.
 
 Some of that infrastructure is formal.  There can be paths, bridges, lights,
-bathrooms, and playgrounds.  The Donauinsel itself is this kind of
+bathrooms, and playgrounds.  The danube island itself is this kind of
 infrastructure.  It lends itself to being used in ways that were not all
-intended when it was made.  That formatl infrastructure gives birth to the
-informal and quite ephermal one: a movie projected onto a bridge pillar,
-markings in a tree, a spot everyone knows is used for dance practice, a skate
-park built by a community in a spot nobody looks.  It is where people take the
+intended when it was made.  That formal infrastructure gives birth to the
+informal and quite ephermal one: a speaker on a tree, a movie on a bridge
+pillar, markings in a bench, a spot everyone knows is used for dance practice, a
+grind box built by a community in a hidden spot.  It is where people take the
 formal room they were given and make it specific.
 
 Modern societies don't value that nearly enough.  Vienna is not particularly
@@ -73,38 +73,41 @@ park](https://www.instagram.com/sanktmarxdiy/), entirely built by the community
 that used it on temporary grounds, and it was eventually razed when the city
 reclaimed the space.  Cities have constraints and every unallocated plot will
 eventually want to turn into a project.  But something real disappeared there.
-It was someone's unpaid labor and imagination becoming part of the world, and
-then becoming a thing other people could enjoy without knowing who made it.
+It was someone's unpaid labor and imagination becoming part of the world which
+then became a gift to others who could enjoy without knowing who made it.
 
-Fear of safety can also harm the existence of such spaces.  The danube island
-and ajacent spaces are routinely pulled into political discussions because that
-space is also occupied by immigrant communities.  Community maintained
-playgrounds have to fight a constant struggle with overzealous individuals who
-want more safety.
+Fear can also harm the existence of such spaces.  The danube island and ajacent
+spaces are routinely pulled into political discussions because that space is
+also occupied by immigrant communities or enables illicit transactions.
+Community maintained playgrounds have to fight a constant struggle with
+overzealous individuals who want more safety.
 
 <figure>
   <img src="/static/images/robinson-playground.jpeg" class="dithered-image full-width" alt="Two of my kids in the wooden playhouse surrounded by dense greenery at the Robinson playground">
   <figcaption>The community built Robinson playground.</figcaption>
 </figure>
 
-All this informal life needs formal places not to fizzle away and at the same
-time formal infrastructure without informal life is sterile and really quite
-boring.
+Formal infrastructure without informal life is sterile and boring and all this
+informal life needs formal places not to fizzle away.  Formal infrastructure
+without space informal life is also inefficient.  So many great spaces in cities
+lay dormant.
 
 Frustratingly, much of the present moment appears to be discussed in very low
-resolution: money, control, competition, geopolitics.  Yet it is a very thin
-description of what society is for.  Even if wanted to measure the impact of these
-informal places and groups we probably wouldn't know how.
+resolution: money, control, competition, geopolitics.  Europe is painted as
+being in a permanent state of decline and loss of GDP, and sure, one would be a
+fool not to pay attention to its struggles.  Yet it is a very thin description
+of what society is for.  Most importantly these public spaces are open to
+everybody, regardless of income.  They can act as a great equalizer that brings
+people together, that would otherwise not meet.
 
-If you accept the idea of the world being defined by the things that are
-measurable completely, even if you only care about building companies,
-increasing output, winning the future, the question really will be for you too:
-to what end?
+If you accept the idea of the world being defined by money and power only, even
+if you only care about building companies, increasing output, winning the
+future, the question really will be for you too: to what end?
 
 A civilization can build offices, data centers, airports and 24-hour coffee
 places for engineers to continue working late at night and to increase
 efficiencies.  It can optimize the calendar until every hour is dedicated to the
-creation of value and money.  It can produce more and measure more and still
+creation of shareholder value.  It can produce more and measure more and still
 lose the texture that made any of it worth doing.  The activities of people that
 takes places on informal places like the island will not show up in metrics.
 The shared meal, the outdoor dance class, the circle of friends that meets in
@@ -118,5 +121,5 @@ remind both myself and others that we should not lose sight of how much detail
 is in this world, and how much these things also matter.  Prosperity should buy
 us more than more work even if we find work fulfilling.  It should buy room for
 human worlds to become detailed and it should encourage us to create the spaces
-for others to fill.  Otherwise, who wants to win the future and then live on a
-barren planet?
+for others to fill.  Otherwise, who wants to win the future and then live in a
+civilization emptied of its human texture?
