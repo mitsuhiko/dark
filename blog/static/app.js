@@ -1,4 +1,34 @@
 (function() {
+  const media = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function addMediaListener(callback) {
+    if (media.addEventListener) {
+      media.addEventListener('change', callback);
+      return () => media.removeEventListener('change', callback);
+    }
+    media.addListener(callback);
+    return () => media.removeListener(callback);
+  }
+
+  window.darkThoughtsTheme = {
+    isLight() {
+      const theme = document.documentElement.getAttribute('data-theme');
+      if (theme === 'light') return true;
+      if (theme === 'dark') return false;
+      return !media.matches;
+    },
+    onChange(callback) {
+      window.addEventListener('dark:themechange', callback);
+      const removeMediaListener = addMediaListener(callback);
+      return () => {
+        window.removeEventListener('dark:themechange', callback);
+        removeMediaListener();
+      };
+    }
+  };
+})();
+
+(function() {
   // Default dither mode - can be overridden via URL parameter ?dither=gaussian|atkinson|noise
   const DEFAULT_DITHER = 'atkinson';
 
@@ -22,6 +52,7 @@
     uniform sampler2D u_bayer;
     uniform vec2 u_resolution;
     uniform int u_ditherMode;  // 0 = Gaussian, 1 = Atkinson, 2 = noise
+    uniform float u_isLight;
     varying vec2 v_texCoord;
 
     // Hash function for stable random noise
@@ -54,10 +85,11 @@
       vec4 color = texture2D(u_image, v_texCoord);
       float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
 
-      // Fade to solid dark at the bottom edge for seamless blend with background
+      // Fade to the page edge color at the bottom so the shader blends into
+      // the surrounding paper/background color.
       float screenY = gl_FragCoord.y / u_resolution.y;
       float fade = smoothstep(0.0, 0.4, screenY);
-      gray *= fade;
+      gray = mix(gray * fade, mix(1.0, gray, fade), u_isLight);
 
       float threshold;
       if (u_ditherMode == 2) {
@@ -75,11 +107,18 @@
         threshold = texture2D(u_bayer, bayerCoord).r;
       }
 
-      // Add small offset so gray=0 always renders as dark
-      float dithered = step(threshold + 0.1, gray);
-      vec3 dark = vec3(0.067);  // #111
-      vec3 cream = vec3(0.91, 0.835, 0.718);  // #e8d5b7
-      gl_FragColor = vec4(mix(dark, cream, dithered), 1.0);
+      // Bias the threshold toward the edge color for each theme: black in
+      // dark mode, white in light mode.
+      float thresholdLevel = clamp(threshold + mix(0.1, -0.1, u_isLight), 0.001, 0.999);
+      float dithered = step(thresholdLevel, gray);
+
+      vec3 darkBg = vec3(0.067);                 // #111
+      vec3 darkInk = vec3(0.91, 0.835, 0.718);   // #e8d5b7
+      vec3 lightInk = vec3(0.541, 0.329, 0.110); // #8a541c
+      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
+      vec3 low = mix(darkBg, lightInk, u_isLight);
+      vec3 high = mix(darkInk, lightPaper, u_isLight);
+      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
     }
   `;
 
@@ -139,6 +178,7 @@
   const ditherParam = urlParams.get('dither');
   const ditherMode = ditherModes[ditherParam] ?? ditherModes[DEFAULT_DITHER];
   gl.uniform1i(gl.getUniformLocation(program, 'u_ditherMode'), ditherMode);
+  const isLightLoc = gl.getUniformLocation(program, 'u_isLight');
 
   const video = document.createElement('video');
   video.crossOrigin = 'anonymous';
@@ -217,12 +257,19 @@
     gl.bindTexture(gl.TEXTURE_2D, texture);
     const source = currentSource === 'video' ? video : fallbackImage;
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    gl.uniform1f(isLightLoc, window.darkThoughtsTheme.isLight() ? 1.0 : 0.0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     // Only keep animating if video is playing, otherwise static image is fine
     if (currentSource === 'video' && videoPlaying) {
       animationId = requestAnimationFrame(render);
     }
   }
+
+  window.darkThoughtsTheme.onChange(function() {
+    // Videos redraw continuously; static fallbacks need a manual repaint.
+    if (!currentSource || !texture || (currentSource === 'video' && videoPlaying)) return;
+    render();
+  });
 
   function tryPlayVideo() {
     if (videoPlaying) return;
@@ -302,6 +349,7 @@
     uniform vec2 u_resolution;
     uniform int u_ditherMode;
     uniform float u_time;
+    uniform float u_isLight;
     varying vec2 v_texCoord;
 
     float hash(vec2 p) {
@@ -348,7 +396,7 @@
       float fadeTop = smoothstep(0.0, 0.1 + edgeNoise, 1.0 - uv.y);
 
       float fade = fadeLeft * fadeRight * fadeBottom * fadeTop;
-      gray *= fade;
+      gray = mix(gray * fade, mix(1.0, gray, fade), u_isLight);
 
       float threshold;
       if (u_ditherMode == 2) {
@@ -373,14 +421,21 @@
       // Starts at gray ~0.05, full effect at gray ~0.3+
       float effectIntensity = smoothstep(0.05, 0.3, gray);
 
-      // Apply noise and flicker to the dither threshold, scaled by brightness
-      float animatedThreshold = threshold + 0.1 + (noise * 0.15 + flicker) * effectIntensity;
+      // Apply noise and flicker to the dither threshold, scaled by brightness.
+      // In light mode the threshold is biased toward white at the edges; in
+      // dark mode it is biased toward black, matching the surrounding page.
+      float thresholdBias = mix(0.1, -0.1, u_isLight);
+      float animatedThreshold = clamp(threshold + thresholdBias + (noise * 0.15 + flicker) * effectIntensity, 0.001, 0.999);
       float dithered = step(animatedThreshold, gray);
 
-      vec3 dark = vec3(0.067);
-      vec3 cream = vec3(0.91, 0.835, 0.718);
+      vec3 darkBg = vec3(0.067);
+      vec3 darkInk = vec3(0.91, 0.835, 0.718);
+      vec3 lightInk = vec3(0.541, 0.329, 0.110);
+      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
+      vec3 low = mix(darkBg, lightInk, u_isLight);
+      vec3 high = mix(darkInk, lightPaper, u_isLight);
 
-      gl_FragColor = vec4(mix(dark, cream, dithered), 1.0);
+      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
     }
   `;
 
@@ -392,6 +447,7 @@
     uniform vec2 u_resolution;
     uniform int u_ditherMode;
     uniform float u_time;
+    uniform float u_isLight;
     varying vec2 v_texCoord;
 
     float hash(vec2 p) {
@@ -441,7 +497,7 @@
       float fadeTop = smoothstep(0.0, fadeWidth + edgeNoise, distTop);
 
       float fade = fadeLeft * fadeRight * fadeBottom * fadeTop;
-      gray *= fade;
+      gray = mix(gray * fade, mix(1.0, gray, fade), u_isLight);
 
       float threshold;
       if (u_ditherMode == 2) {
@@ -459,13 +515,18 @@
       float noise = animatedNoise(noiseCoord, u_time) - 0.5;
       float flicker = 0.08 * sin(u_time * 2.0 + hash(gl_FragCoord.xy * 0.2) * 6.28);
       float effectIntensity = smoothstep(0.05, 0.3, gray);
-      float animatedThreshold = threshold + 0.1 + (noise * 0.15 + flicker) * effectIntensity;
+      float thresholdBias = mix(0.1, -0.1, u_isLight);
+      float animatedThreshold = clamp(threshold + thresholdBias + (noise * 0.15 + flicker) * effectIntensity, 0.001, 0.999);
       float dithered = step(animatedThreshold, gray);
 
-      vec3 dark = vec3(0.067);
-      vec3 cream = vec3(0.91, 0.835, 0.718);
+      vec3 darkBg = vec3(0.067);
+      vec3 darkInk = vec3(0.91, 0.835, 0.718);
+      vec3 lightInk = vec3(0.541, 0.329, 0.110);
+      vec3 lightPaper = vec3(1.0, 0.973, 0.925); // #fff8ec
+      vec3 low = mix(darkBg, lightInk, u_isLight);
+      vec3 high = mix(darkInk, lightPaper, u_isLight);
 
-      gl_FragColor = vec4(mix(dark, cream, dithered), 1.0);
+      gl_FragColor = vec4(mix(low, high, dithered), 1.0);
     }
   `;
 
@@ -582,6 +643,7 @@
 
       const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
       const timeLoc = gl.getUniformLocation(program, 'u_time');
+      const isLightLoc = gl.getUniformLocation(program, 'u_isLight');
 
       let startTime = performance.now();
       let needsResize = true;
@@ -590,6 +652,7 @@
       let animationId = null;
       let didCleanup = false;
       let observer = null;
+      let removeThemeListener = null;
       const loseContext = gl.getExtension('WEBGL_lose_context');
 
       function cleanup() {
@@ -606,6 +669,11 @@
           observer = null;
         }
 
+        if (removeThemeListener) {
+          removeThemeListener();
+          removeThemeListener = null;
+        }
+
         window.removeEventListener('resize', onResize);
         if (loseContext) {
           loseContext.loseContext();
@@ -616,9 +684,18 @@
 
       function onResize() {
         needsResize = true;
+        requestRender();
+      }
+
+      function requestRender() {
+        if (!animationId) {
+          lastFrameTime = 0;
+          animationId = requestAnimationFrame(render);
+        }
       }
 
       canvas.__darkDitherCleanup = cleanup;
+      removeThemeListener = window.darkThoughtsTheme.onChange(requestRender);
 
       // Upload texture once (image is static)
       gl.activeTexture(gl.TEXTURE0);
@@ -626,6 +703,8 @@
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
 
       function render(timestamp) {
+        animationId = null;
+
         if (!canvas.isConnected) {
           cleanup();
           return;
@@ -652,6 +731,7 @@
         // Update time uniform for animation (2000 = half speed)
         const elapsed = (performance.now() - startTime) / 2000.0;
         gl.uniform1f(timeLoc, elapsed);
+        gl.uniform1f(isLightLoc, window.darkThoughtsTheme.isLight() ? 1.0 : 0.0);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -680,7 +760,7 @@
 
         isVisible = entries[0].isIntersecting;
         if (isVisible && !REDUCED_MOTION && !animationId) {
-          animationId = requestAnimationFrame(render);
+          requestRender();
         } else if (!isVisible && animationId) {
           cancelAnimationFrame(animationId);
           animationId = null;

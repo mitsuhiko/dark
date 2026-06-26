@@ -1,22 +1,70 @@
 @charset "utf-8";
 
-/* colors - always dark */
+/* colors */
 :root {
-  --background-color: #111;
-  --text-color: #fff;
-  --primary-color: #e8d5b7;
-  --secondary-color: #f5e6d3;
-  --header-color: #f0e4d4;
-  --faded-color: #c4b49a;
-  --border-color: #444;
-  --code-background-color: #222;
-  --code-block-background-color: #1a1a1a;
-  --code-block-text-color: #e0e0e0;
-  --table-background-color: #1a1a1a;
-  --table-border-color: #333;
-  --pre-shadow: rgba(0, 0, 0, 0.3);
-  --hr-shadow: #000;
-  --date-warning-text-color: #e8b87a;
+  --background-color: light-dark(#fff8ec, #111);
+  --text-color: light-dark(#24180f, #fff);
+  --primary-color: light-dark(#8a541c, #e8d5b7);
+  --secondary-color: light-dark(#a15f20, #f5e6d3);
+  --header-color: light-dark(#5e3b18, #f0e4d4);
+  --faded-color: light-dark(#806f5a, #c4b49a);
+  --border-color: light-dark(#dbc9ad, #444);
+  --code-background-color: light-dark(#f1e4cf, #222);
+  --code-block-background-color: light-dark(#fffdf8, #1a1a1a);
+  --code-block-text-color: light-dark(#24180f, #e0e0e0);
+  --table-background-color: light-dark(#fffdf8, #1a1a1a);
+  --table-border-color: light-dark(#e1cfb4, #333);
+  --pre-shadow: light-dark(rgba(140, 95, 35, 0.18), rgba(0, 0, 0, 0.3));
+  --hr-shadow: light-dark(#e2d1b6, #000);
+  --date-warning-text-color: light-dark(#9c5f00, #e8b87a);
+  --date-warning-background-color: light-dark(rgba(238, 118, 26, 0.10), rgba(238, 118, 26, 0.15));
+  --tooltip-shadow: light-dark(rgba(120, 82, 30, 0.18), rgba(0, 0, 0, 0.15));
+  --image-fade-color: var(--background-color);
+  color-scheme: light dark;
+
+  &[data-theme="dark"]  { color-scheme: dark; }
+  &[data-theme="light"] { color-scheme: light; }
+}
+
+html:not([data-initial-load="true"]),
+html:not([data-initial-load="true"]) body,
+html:not([data-initial-load="true"]) a,
+html:not([data-initial-load="true"]) h1,
+html:not([data-initial-load="true"]) h2,
+html:not([data-initial-load="true"]) h3,
+html:not([data-initial-load="true"]) h4,
+html:not([data-initial-load="true"]) h5,
+html:not([data-initial-load="true"]) h6,
+html:not([data-initial-load="true"]) pre,
+html:not([data-initial-load="true"]) code,
+html:not([data-initial-load="true"]) tt,
+html:not([data-initial-load="true"]) table,
+html:not([data-initial-load="true"]) details,
+html:not([data-initial-load="true"]) .tag-tooltip,
+html:not([data-initial-load="true"]) .header-image {
+  transition-duration: 300ms;
+  transition-property: background-color, color, border-color, box-shadow;
+}
+
+@media screen and (prefers-reduced-motion: reduce), (update: slow) {
+  html,
+  html body,
+  html a,
+  html h1,
+  html h2,
+  html h3,
+  html h4,
+  html h5,
+  html h6,
+  html pre,
+  html code,
+  html tt,
+  html table,
+  html details,
+  html .tag-tooltip,
+  html .header-image {
+    transition-duration: 0s;
+  }
 }
 
 /* header image */
@@ -25,6 +73,7 @@
   width: 100%;
   height: 200px;
   overflow: hidden;
+  background: var(--image-fade-color);
 }
 
 .header-image canvas {
@@ -41,6 +90,14 @@ body    { font: 21px/26px 'Crimson Text', serif;
           margin: 0; padding: 0; font-weight: 400; color: var(--text-color); }
 a       { color: var(--primary-color); font-weight: 400; }
 a:hover { color: var(--secondary-color); }
+
+/* theme selector */
+p.theme-selector {
+  input                { display: none; }
+  label                { cursor: pointer; margin: 0; text-decoration: none; }
+  label:hover          { text-decoration: underline; }
+  input:checked + span { text-decoration: underline; color: var(--text-color); }
+}
 
 /* tag sort controls */
 .tag-sort-controls {
@@ -222,7 +279,7 @@ span.date-warning {
 span.upcoming-indicator {
   color: var(--date-warning-text-color);
   font-style: italic;
-  background: rgba(238, 118, 26, 0.15);
+  background: var(--date-warning-background-color);
   padding: 2px 6px;
   line-height: 1.1em;
   border-radius: 3px;
@@ -263,7 +320,7 @@ img.dithered-image-alt {
   transition: opacity 0.2s ease;
   z-index: 1000;
   border: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px var(--tooltip-shadow);
 }
 
 .tag-tooltip::before,

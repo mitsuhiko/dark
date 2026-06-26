@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="system">
   <head>
     <meta charset=utf-8>
   {% block htmlhead %}
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="/static/fonts.css" type="text/css">
     <link rel="stylesheet" href="/static/style.css" type="text/css">
     <link rel="stylesheet" href="/static/_pygments.css" type="text/css">
-    <noscript><style>img.dithered-image { visibility: visible; }</style></noscript>
+    <noscript><style>img.dithered-image, img.dithered-image-alt { visibility: visible; }</style></noscript>
     <meta name="title" content="{{ self.title() }}">
     <meta property="og:title" content="{{ self.title() }}">
     <meta property="og:site_name" content="Dark Thoughts">
@@ -51,6 +51,43 @@
     <div class="header-image">
       <canvas id="header-canvas"></canvas>
     </div>
+    <script>
+      let $THEME = null;
+
+      function readStoredTheme() {
+        try {
+          return localStorage.getItem("theme");
+        } catch {
+          return null;
+        }
+      }
+
+      function writeStoredTheme(theme) {
+        try {
+          if (theme === "system") {
+            localStorage.removeItem("theme");
+          } else {
+            localStorage.setItem("theme", theme);
+          }
+        } catch {
+          // Ignore storage failures; the selected theme still applies in-memory.
+        }
+      }
+
+      function selectTheme(theme) {
+        const node = document.documentElement;
+        if (!["system", "light", "dark"].includes(theme)) {
+          theme = "system";
+        }
+        writeStoredTheme(theme);
+        node.setAttribute("data-theme", theme);
+        $THEME = theme;
+        window.dispatchEvent(new CustomEvent("dark:themechange", { detail: { theme } }));
+      }
+
+      selectTheme(readStoredTheme() || "system");
+      document.documentElement.setAttribute("data-initial-load", "true");
+    </script>
     <script src="/static/htmx.min.js"></script>
     <script src="/static/htmx-head-support.js"></script>
     <script src="/static/app.js"></script>
@@ -100,7 +137,26 @@
         <p>&copy; Copyright {{ format_date(format='YYYY') }} by <a href="https://mitsuhiko.at/">Armin Ronacher</a>.
         <p>
           Subscribe via <a href="/feed.atom" rel="alternate" title="Dark Thoughts" hx-boost="false">atom</a> / <a href="/feed.xml" rel="alternate" title="dark" hx-boost="false">RSS</a>.
+        <p class="theme-selector" hidden>
+          Color scheme:
+          <label><input type="radio" name="theme" value="system"> <span>auto</span></label>,
+          <label><input type="radio" name="theme" value="light"> <span>light</span></label>,
+          <label><input type="radio" name="theme" value="dark"> <span>dark</span></label>.
+          <script>
+            document.querySelector('.theme-selector').removeAttribute('hidden');
+            document.querySelectorAll('input[name="theme"]').forEach(input => {
+              input.checked = input.value === $THEME;
+              input.addEventListener('change', () => {
+                selectTheme(input.value);
+              });
+            });
+          </script>
       </div>
     </div>
+    <script>
+      window.setTimeout(() => {
+        document.documentElement.removeAttribute("data-initial-load");
+      }, 0);
+    </script>
   </body>
 </html>
