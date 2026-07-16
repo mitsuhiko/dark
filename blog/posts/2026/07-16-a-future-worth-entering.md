@@ -17,10 +17,10 @@ child would have lived was likely to be worse than no life at all, non-creation
 is not rescue.  It prevents every joy, relationship, achievement and experience
 just as completely as it prevents suffering.
 
-Calling the future a "hell-world" simply assumes a negative conclusion that is
-not a given.  I am glad to live this life.  The idea that my parents could have
-decided that the Cold War and the possibility of nuclear annihilation were
-reasons not to have me saddens me greatly.
+Treating today's threats and worries as proof of a bleak future simply assumes a
+negative conclusion that is not a given.  I am glad to live this life.  The idea
+that my parents could have decided that the Cold War and the possibility of
+nuclear annihilation were reasons not to have me saddens me greatly.
 
 One must not get moral credit for "saving" someone whose existence one
 prevented, particularly after simply presuming on their behalf that their life
