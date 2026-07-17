@@ -37,7 +37,7 @@ on.  More importantly, it needs to retain people already here.  An ambitious
 young European who leaves for the United States, and an ambitious person abroad
 who decides not to come in the first place, are both losses we seem strangely
 unwilling to take seriously.  From what I have observed, those people are not
-leaving because of a Syrian immigration on the street (though maybe Twitter might
+leaving because of a Syrian immigrant on the street (though maybe Twitter might
 make you believe otherwise) but because they find better starting conditions
 elsewhere.  In fact, the same fundamental forces that make a Syrian leave to
 Europe, makes a European move to the US or Dubai.
@@ -105,7 +105,7 @@ I do not see progress, I see a complete failure in policy making.
 The claim that Europe emits too little to matter is a particular odd view for
 me.  Every country can make the same claim and Europe is still a large, rich
 industrial bloc whose consumption, technology, standards, and investments matter
-far beyond its direct emissions.  For many counties, climate change is not a
+far beyond its direct emissions.  For many countries, climate change is not a
 moral hobby imposed on Europe from outside but by nature.  Heat, drought,
 expensive insurance, unstable food production, and displacement are all costs
 that put pressure all across the world.  Maybe not all those countries have
