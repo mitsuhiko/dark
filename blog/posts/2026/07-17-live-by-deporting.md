@@ -37,7 +37,7 @@ on.  More importantly, it needs to retain people already here.  An ambitious
 young European who leaves for the United States, and an ambitious person abroad
 who decides not to come in the first place, are both losses we seem strangely
 unwilling to take seriously.  From what I have observed, those people are not
-leaving because of a Syran immigration on the street (though maybe Twitter might
+leaving because of a Syrian immigration on the street (though maybe Twitter might
 make you believe otherwise) but because they find better starting conditions
 elsewhere.  In fact, the same fundamental forces that make a Syrian leave to
 Europe, makes a European move to the US or Dubai.
@@ -114,7 +114,7 @@ are real issues regardless.
 
 There is a real criticism of European climate policy: it can be bureaucratic,
 expensive, slow, and too focused on making ordinary people feel guilty.  When
-you give me a power straw that dissolves in the matter of minutes, I just get
+you give me a paper straw that dissolves in the matter of minutes, I just get
 reminded of the absurdity every day.  We should make that criticism.  But the
 alternative should be a credible program of cheap clean power and resilience,
 not a politics that calls the future someone else's problem.
