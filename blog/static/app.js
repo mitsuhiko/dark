@@ -890,10 +890,16 @@
       let observer = null;
       let removeThemeListener = null;
       const loseContext = gl.getExtension('WEBGL_lose_context');
+      const defaultImageSource = img.currentSrc || img.src;
+      const lightImageSource = img.getAttribute('data-light-src');
+      const sourceImages = new Map([[defaultImageSource, img]]);
+      let currentImageSource = null;
+      let imageLoadGeneration = 0;
 
       function cleanup() {
         if (didCleanup) return;
         didCleanup = true;
+        imageLoadGeneration++;
 
         if (animationId) {
           cancelAnimationFrame(animationId);
@@ -930,13 +936,68 @@
         }
       }
 
-      canvas.__darkDitherCleanup = cleanup;
-      removeThemeListener = window.darkThoughtsTheme.onChange(requestRender);
+      function desiredImageSource() {
+        if (lightImageSource && window.darkThoughtsTheme.isLight()) {
+          return lightImageSource;
+        }
+        return defaultImageSource;
+      }
 
-      // Upload texture once (image is static)
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      function uploadImageTexture(sourceImage, source) {
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sourceImage);
+        currentImageSource = source;
+
+        if (sourceImage.naturalWidth && sourceImage.naturalHeight) {
+          canvas.style.aspectRatio = sourceImage.naturalWidth + ' / ' + sourceImage.naturalHeight;
+          needsResize = true;
+        }
+        if (canvas.isConnected) {
+          requestRender();
+        }
+      }
+
+      function syncThemeImage() {
+        const source = desiredImageSource();
+        const generation = ++imageLoadGeneration;
+        if (source === currentImageSource) return;
+
+        let sourceImage = sourceImages.get(source);
+        if (!sourceImage) {
+          sourceImage = new Image();
+          sourceImage.decoding = 'async';
+          sourceImages.set(source, sourceImage);
+          sourceImage.src = source;
+        }
+
+        const uploadWhenCurrent = function() {
+          if (didCleanup || generation !== imageLoadGeneration || source !== desiredImageSource()) {
+            return;
+          }
+          uploadImageTexture(sourceImage, source);
+        };
+
+        if (sourceImage.complete && sourceImage.naturalWidth > 0) {
+          uploadWhenCurrent();
+        } else {
+          sourceImage.addEventListener('load', uploadWhenCurrent, { once: true });
+          sourceImage.addEventListener('error', function() {
+            sourceImages.delete(source);
+          }, { once: true });
+        }
+      }
+
+      function onThemeChange() {
+        syncThemeImage();
+        requestRender();
+      }
+
+      canvas.__darkDitherCleanup = cleanup;
+      removeThemeListener = window.darkThoughtsTheme.onChange(onThemeChange);
+
+      uploadImageTexture(img, defaultImageSource);
+      syncThemeImage();
 
       function render(timestamp) {
         animationId = null;
